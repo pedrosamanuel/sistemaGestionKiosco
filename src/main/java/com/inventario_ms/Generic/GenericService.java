@@ -6,24 +6,27 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
-public abstract class GenericService<T, ID> {
+public abstract class GenericService<T,DTO, ID> {
 
     private final GenericRepository<T, ID> repository;
 
     public GenericService(GenericRepository<T, ID> repository) {
         this.repository = repository;
     }
-    public List<T> findAll() {
-        return repository.findAll();
+    public List<DTO> findAll() {
+        List<T> list = repository.findAll();
+        return list.stream().map(this::convertToDTO).collect(Collectors.toList());
     }
 
     public Page<T> findAll(Pageable pageable) {
         return repository.findAll(pageable);
     }
 
-    public Optional<T> findById(ID id) {
-        return repository.findById(id);
+    public Optional<DTO> findById(ID id) {
+        Optional<T> entity = repository.findById(id);
+        return entity.map(this::convertToDTO);
     }
 
     public void save(T entity) {
@@ -51,4 +54,5 @@ public abstract class GenericService<T, ID> {
     }
 
     protected abstract T updateEntity(T entity, T updatedEntity);
+    protected abstract DTO convertToDTO(T entity);
 }

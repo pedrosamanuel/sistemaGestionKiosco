@@ -5,22 +5,22 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
 
-public abstract class GenericController<T, ID> {
+public abstract class GenericController<T,DTO, ID> {
 
-    private final GenericService<T, ID> service;
+    private final GenericService<T, DTO, ID> service;
 
-    public GenericController(GenericService<T, ID> service) {
+    public GenericController(GenericService<T,DTO,ID> service) {
         this.service = service;
     }
 
     @GetMapping
-    public ResponseEntity<List<T>> getAll() {
+    public ResponseEntity<List<DTO>> getAll() {
         return ResponseEntity.ok(service.findAll());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<T> getById(@PathVariable ID id) {
-        Optional<T> entity = service.findById(id);
+    public ResponseEntity<DTO> getById(@PathVariable ID id) {
+        Optional<DTO> entity = service.findById(id);
         return entity.map(ResponseEntity::ok).orElseGet(()
                 -> ResponseEntity.notFound().build());
     }

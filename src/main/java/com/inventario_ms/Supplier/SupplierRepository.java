@@ -1,8 +1,8 @@
-package com.inventario_ms.Proveedor;
+package com.inventario_ms.Supplier;
 
 import com.inventario_ms.Generic.GenericRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface ProviderRepository extends GenericRepository<Provider,Long> {
+public interface SupplierRepository extends GenericRepository<Supplier,Long> {
 }

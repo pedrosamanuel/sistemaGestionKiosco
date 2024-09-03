@@ -2,14 +2,16 @@ package com.inventario_ms.Product;
 
 import com.inventario_ms.Generic.GenericRepository;
 import com.inventario_ms.Generic.GenericService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.inventario_ms.Supplier.Supplier;
+import com.inventario_ms.Supplier.SupplierProduct;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+
 
 @Service
-public class ProductService extends GenericService<Product,Long> {
+public class ProductService extends GenericService<Product,ProductDTO,Long> {
     public ProductService(GenericRepository<Product, Long> repository) {
         super(repository);
     }
@@ -25,5 +27,22 @@ public class ProductService extends GenericService<Product,Long> {
         return entity;
     }
 
-
+    @Override
+    protected ProductDTO convertToDTO(Product entity) {
+        ProductDTO dto = new ProductDTO();
+        dto.setId(entity.getId());
+        dto.setMarca(entity.getMarca());
+        dto.setNombre(entity.getNombre());
+        dto.setDescripcion(entity.getDescripcion());
+        dto.setStockActual(entity.getStockActual());
+        dto.setStockMinimo(entity.getStockMinimo());
+        dto.setPrecio(entity.getPrecio());
+        List<SupplierProduct> supplierProducts = entity.getSupplierProducts();
+        List<Supplier> suppliers = new ArrayList<>();
+        for (SupplierProduct s : supplierProducts){
+            suppliers.add(s.getSupplier());
+        }
+        dto.setSuppliers(suppliers);
+        return dto;
+    }
 }

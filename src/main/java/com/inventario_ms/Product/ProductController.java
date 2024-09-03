@@ -11,11 +11,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/products")
-public class ProductController extends GenericController<Product,Long> {
+public class ProductController extends GenericController<Product,ProductDTO,Long> {
 
     public ProductController (ProductService productService){
         super(productService);
     }
-
 
 }
