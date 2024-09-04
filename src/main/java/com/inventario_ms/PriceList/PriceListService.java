@@ -53,32 +53,28 @@ public class PriceListService extends GenericService<PriceList,PriceListDTO,Long
         try {
             InputStream is = file.getInputStream();
             Workbook workbook = new XSSFWorkbook(is);
-            Sheet sheet = workbook.getSheetAt(0);
+            Sheet sheet = workbook.getSheetAt(1);
+            for(Row row: sheet){
+                if (row.getRowNum() == 0) {
+                    continue;
+                }
+                PriceListProduct priceListProduct = new PriceListProduct();
+                priceListProduct.setPrecio(row.getCell(4).getNumericCellValue());
+                priceListProduct.setCantidad((int) row.getCell(5).getNumericCellValue());
+                Optional<Product> optional = productRepository.findById((long) row.getCell(0).getNumericCellValue());//chequear si es la forma mas coveniente
+                priceListProduct.setProduct(optional.orElse(null));
+                priceListProduct.setPriceList(priceList);
+                priceListProduct.setPriceList(priceList);
+                priceListProducts.add(priceListProduct);
+            }
+            sheet = workbook.getSheetAt(0);
             Row r = sheet.getRow(1);
             if (r != null) {
                 priceListDTO.setFechaInicioVigencia(r.getCell(0).getLocalDateTimeCellValue().toLocalDate());
                 priceListDTO.setFechaFinvigencia(r.getCell(1).getLocalDateTimeCellValue().toLocalDate());
                 priceList.setFechaInicioVigencia(r.getCell(0).getLocalDateTimeCellValue().toLocalDate());
                 priceList.setFechaFinvigencia(r.getCell(1).getLocalDateTimeCellValue().toLocalDate());
-                priceListRepository.save(priceList);
             }
-            sheet = workbook.getSheetAt(1);
-            for(Row row: sheet){
-                if (row.getRowNum() == 0) {
-                    continue;
-                }
-                PriceListProduct priceListProduct = new PriceListProduct();
-
-                priceListProduct.setPrecio(row.getCell(4).getNumericCellValue());
-                priceListProduct.setCantidad((int) row.getCell(5).getNumericCellValue());
-                Optional<Product> optional = productRepository.findById((long) row.getCell(0).getNumericCellValue());
-                priceListProduct.setProduct(optional.orElse(null));
-                priceListProduct.setPriceList(priceList);
-                priceListProduct.setPriceList(priceList);
-                priceListProducts.add(priceListProduct);
-                priceListProductRepository.save(priceListProduct);
-            }
-
             priceListDTO.setPriceListProducts(priceListProducts);
             priceList.setPriceListProducts(priceListProducts);
             priceListRepository.save(priceList);
