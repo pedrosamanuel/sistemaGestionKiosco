@@ -3,6 +3,8 @@ package com.inventario_ms.PriceList;
 import com.inventario_ms.Generic.GenericService;
 import com.inventario_ms.Product.Product;
 import com.inventario_ms.Product.ProductRepository;
+import com.inventario_ms.Supplier.Supplier;
+import com.inventario_ms.Supplier.SupplierRepository;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -20,15 +22,15 @@ import java.util.Optional;
 public class PriceListService extends GenericService<PriceList,PriceListDTO,Long> {
     private final ProductRepository productRepository;
     private final PriceListRepository priceListRepository;
-    private final PriceListProductRepository priceListProductRepository;
+    private final SupplierRepository supplierRepository;
+
     public PriceListService(PriceListRepository priceListRepository,
                             ProductRepository productRepository,
-                            PriceListProductRepository priceListProductRepository) {
+                            SupplierRepository supplierRepository) {
         super(priceListRepository);
-
         this.productRepository = productRepository;
         this.priceListRepository = priceListRepository;
-        this.priceListProductRepository = priceListProductRepository;
+        this.supplierRepository = supplierRepository;
     }
 
     @Override
@@ -39,14 +41,13 @@ public class PriceListService extends GenericService<PriceList,PriceListDTO,Long
     @Override
     protected PriceListDTO convertToDTO(PriceList entity) {
         PriceListDTO dto = new PriceListDTO();
-        dto.setId(entity.getId());
         dto.setFechaFinvigencia(entity.getFechaFinvigencia());
         dto.setFechaInicioVigencia(entity.getFechaInicioVigencia());
         dto.setSupplier(entity.getSupplier());
         dto.setPriceListProducts(entity.getPriceListProducts());
         return dto;
     }
-    public PriceListDTO uploadPriceList(MultipartFile file) {
+    public PriceListDTO uploadPriceList(Long supplierId, MultipartFile file) {
         PriceListDTO priceListDTO = new PriceListDTO();
         PriceList priceList = new PriceList();
         List<PriceListProduct> priceListProducts = new ArrayList<>();
@@ -59,24 +60,28 @@ public class PriceListService extends GenericService<PriceList,PriceListDTO,Long
                     continue;
                 }
                 PriceListProduct priceListProduct = new PriceListProduct();
-                priceListProduct.setPrecio(row.getCell(4).getNumericCellValue());
-                priceListProduct.setCantidad((int) row.getCell(5).getNumericCellValue());
-                Optional<Product> optional = productRepository.findById((long) row.getCell(0).getNumericCellValue());//chequear si es la forma mas coveniente
+
+                Optional<Product> optional = productRepository.findById((long) row.getCell(0).getNumericCellValue());
                 priceListProduct.setProduct(optional.orElse(null));
-                priceListProduct.setPriceList(priceList);
+
+                priceListProduct.setPrecio(row.getCell(3).getNumericCellValue());
+                priceListProduct.setCantidad((int) row.getCell(4).getNumericCellValue());
+                priceListProduct.setPromocion(row.getCell(5).getBooleanCellValue());
                 priceListProduct.setPriceList(priceList);
                 priceListProducts.add(priceListProduct);
             }
             sheet = workbook.getSheetAt(0);
             Row r = sheet.getRow(1);
             if (r != null) {
-                priceListDTO.setFechaInicioVigencia(r.getCell(0).getLocalDateTimeCellValue().toLocalDate());
-                priceListDTO.setFechaFinvigencia(r.getCell(1).getLocalDateTimeCellValue().toLocalDate());
                 priceList.setFechaInicioVigencia(r.getCell(0).getLocalDateTimeCellValue().toLocalDate());
                 priceList.setFechaFinvigencia(r.getCell(1).getLocalDateTimeCellValue().toLocalDate());
             }
-            priceListDTO.setPriceListProducts(priceListProducts);
+
             priceList.setPriceListProducts(priceListProducts);
+            priceList.setSupplier(supplierRepository.findById(supplierId).orElseThrow());
+
+            priceListDTO = convertToDTO(priceList);
+
             priceListRepository.save(priceList);
             return priceListDTO;
         } catch ( IOException e) {

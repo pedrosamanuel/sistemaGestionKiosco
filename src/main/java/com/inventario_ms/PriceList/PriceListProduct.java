@@ -15,6 +15,7 @@ import lombok.EqualsAndHashCode;
 public class PriceListProduct extends BaseEntity<Long> {
     private double precio;
     private int cantidad;
+    private boolean promocion;
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "priceList_id")

@@ -18,7 +18,6 @@ public class ProductService extends GenericService<Product,ProductDTO,Long> {
 
     @Override
     protected Product updateEntity(Product entity, Product updatedEntity) {
-        entity.setNombre(updatedEntity.getNombre());
         entity.setDescripcion(updatedEntity.getDescripcion());
         entity.setMarca(updatedEntity.getMarca());
         entity.setStockActual(updatedEntity.getStockActual());
@@ -32,7 +31,6 @@ public class ProductService extends GenericService<Product,ProductDTO,Long> {
         ProductDTO dto = new ProductDTO();
         dto.setId(entity.getId());
         dto.setMarca(entity.getMarca());
-        dto.setNombre(entity.getNombre());
         dto.setDescripcion(entity.getDescripcion());
         dto.setStockActual(entity.getStockActual());
         dto.setStockMinimo(entity.getStockMinimo());

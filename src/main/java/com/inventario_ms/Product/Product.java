@@ -18,7 +18,6 @@ import java.util.List;
 @Data
 public class Product extends BaseEntity<Long> {
     private String marca;
-    private String nombre;
     private String descripcion;
     private int stockActual;
     private int stockMinimo;

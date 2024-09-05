@@ -12,7 +12,6 @@ import java.util.List;
 @Data
 public class ProductDTO extends BaseDTO<Long> {
     private String marca;
-    private String nombre;
     private String descripcion;
     private int stockActual;
     private int stockMinimo;

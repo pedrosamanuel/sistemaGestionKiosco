@@ -16,10 +16,9 @@ public class SupplierController extends GenericController<Supplier,SupplierDTO,L
     }
     @PostMapping("/{supplierId}/addProduct")
     public ResponseEntity<String> addProduct(@PathVariable Long supplierId,
-                                             @RequestParam Long productId,
-                                             @RequestParam String codExternoProduct){
+                                             @RequestParam Long productId){
 
-        Boolean isAdded = supplierService.addProduct(supplierId ,productId, codExternoProduct);
+        Boolean isAdded = supplierService.addProduct(supplierId ,productId);
         if(isAdded) {
             return ResponseEntity.ok("Producto añadido correctamente");
         }

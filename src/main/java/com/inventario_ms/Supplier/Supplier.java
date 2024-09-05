@@ -15,7 +15,6 @@ import java.util.List;
 @Data
 public class Supplier extends BaseEntity<Long> {
     private String nombre;
-    private String codProveedor;
     @OneToMany(mappedBy = "supplier")
     @JsonIgnore
     private List<SupplierProduct> products = new ArrayList<>();

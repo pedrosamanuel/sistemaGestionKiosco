@@ -5,5 +5,4 @@ import lombok.Data;
 @Data
 public class SupplierDTO extends BaseDTO<Long> {
     private String nombre;
-    private String codProveedor;
 }

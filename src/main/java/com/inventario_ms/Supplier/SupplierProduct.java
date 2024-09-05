@@ -17,7 +17,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SupplierProduct extends BaseEntity<Long> {
-    private String codExternoProducto;
     private LocalDateTime fechaAsignacion;
     private LocalDateTime fechaDesasignacion;
     @JoinColumn(name = "supplier_id")

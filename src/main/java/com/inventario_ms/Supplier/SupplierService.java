@@ -24,37 +24,34 @@ public class SupplierService extends GenericService<Supplier,SupplierDTO,Long> {
         this.supplierProductRepository = supplierProductRepository;
     }
 
-    public Boolean addProduct(Long supplierId, Long productId, String codExternoProducto){
+    public Boolean addProduct(Long supplierId, Long productId){
         Supplier supplier = supplierRepository.findById(supplierId).orElseThrow();
         Product product = productRepository.findById(productId).orElseThrow();
-        SupplierProduct supplierProduct =
-                new SupplierProduct(codExternoProducto,
-                        LocalDateTime.now(),
-                        null,
-                        supplier,
-                        product);
-        Optional<List<SupplierProduct>> optionalSupplierProduct = supplierProductRepository.findBySupplierIdAndProductId(supplierId,productId);
-        if (optionalSupplierProduct.isPresent()){
-            List<SupplierProduct> supplierProducts = optionalSupplierProduct.get();
-            for (SupplierProduct p : supplierProducts){
-                if (p.getFechaDesasignacion() == null){
-                    return false;
-                }
-            }
-        }
-        supplierProductRepository.save(supplierProduct);
-        return true;
+
+       boolean isAdded = supplierProductRepository.existsActiveSupplierProduct(supplierId,productId);
+       if (isAdded){
+           return false;
+       }
+       SupplierProduct supplierProduct =
+               new SupplierProduct(
+                       LocalDateTime.now(),
+                       null,
+                       supplier,
+                       product);
+       supplierProductRepository.save(supplierProduct);
+       return true;
+
     }
     public Boolean deleteProduct(Long supplierId, Long productId){
-        Optional<List<SupplierProduct>> optionalSupplierProduct = supplierProductRepository.findBySupplierIdAndProductId(supplierId,productId);
-        if (optionalSupplierProduct.isPresent()){
-            List<SupplierProduct> supplierProducts = optionalSupplierProduct.get();
-            for (SupplierProduct p : supplierProducts){
-                if (p.getFechaDesasignacion() == null){
-                    p.setFechaDesasignacion(LocalDateTime.now());
-                    supplierProductRepository.save(p);
-                    return true;
-                }
+        boolean isAdded = supplierProductRepository.existsActiveSupplierProduct(supplierId,productId);
+        if (isAdded){
+            Optional<SupplierProduct> optionalsp =
+                    supplierProductRepository.findBySupplierIdAndProductId(supplierId,productId);
+            if(optionalsp.isPresent()){
+                SupplierProduct supplierProduct = optionalsp.get();
+                supplierProduct.setFechaDesasignacion(LocalDateTime.now());
+                supplierProductRepository.save(supplierProduct);
+                return true;
             }
         }
         return false;
@@ -62,7 +59,6 @@ public class SupplierService extends GenericService<Supplier,SupplierDTO,Long> {
 
     @Override
     protected Supplier updateEntity(Supplier entity, Supplier updatedEntity) {
-        entity.setCodProveedor(updatedEntity.getCodProveedor());
         entity.setNombre(updatedEntity.getNombre());
         return entity;
     }
@@ -71,7 +67,6 @@ public class SupplierService extends GenericService<Supplier,SupplierDTO,Long> {
     protected SupplierDTO convertToDTO(Supplier entity) {
         SupplierDTO dto = new SupplierDTO();
         dto.setId(entity.getId());
-        dto.setCodProveedor(entity.getCodProveedor());
         dto.setNombre(entity.getNombre());
         return dto;
     }
