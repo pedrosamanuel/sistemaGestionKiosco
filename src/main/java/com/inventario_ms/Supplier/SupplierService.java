@@ -2,31 +2,31 @@ package com.inventario_ms.Supplier;
 
 import com.inventario_ms.Generic.GenericService;
 import com.inventario_ms.Product.Product;
-import com.inventario_ms.Product.ProductRepository;
+import com.inventario_ms.Product.ProductService;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
 @Service
 public class SupplierService extends GenericService<Supplier,SupplierDTO,Long> {
     private final SupplierRepository supplierRepository;
-    private final ProductRepository productRepository;
+    private final ProductService productService;
     private final SupplierProductRepository supplierProductRepository;
 
     public SupplierService(SupplierRepository supplierRepository,
-                           ProductRepository productRepository,
+                           ProductService productService,
                            SupplierProductRepository supplierProductRepository) {
         super(supplierRepository);
         this.supplierRepository = supplierRepository;
-        this.productRepository = productRepository;
+        this.productService = productService;
+
         this.supplierProductRepository = supplierProductRepository;
     }
 
     public Boolean addProduct(Long supplierId, Long productId){
         Supplier supplier = supplierRepository.findById(supplierId).orElseThrow();
-        Product product = productRepository.findById(productId).orElseThrow();
+        Product product = productService.findById(productId).orElseThrow();
 
        boolean isAdded = supplierProductRepository.existsActiveSupplierProduct(supplierId,productId);
        if (isAdded){
@@ -40,15 +40,14 @@ public class SupplierService extends GenericService<Supplier,SupplierDTO,Long> {
                        product);
        supplierProductRepository.save(supplierProduct);
        return true;
-
     }
     public Boolean deleteProduct(Long supplierId, Long productId){
         boolean isAdded = supplierProductRepository.existsActiveSupplierProduct(supplierId,productId);
         if (isAdded){
-            Optional<SupplierProduct> optionalsp =
+            Optional<SupplierProduct> optional =
                     supplierProductRepository.findBySupplierIdAndProductId(supplierId,productId);
-            if(optionalsp.isPresent()){
-                SupplierProduct supplierProduct = optionalsp.get();
+            if(optional.isPresent()){
+                SupplierProduct supplierProduct = optional.get();
                 supplierProduct.setFechaDesasignacion(LocalDateTime.now());
                 supplierProductRepository.save(supplierProduct);
                 return true;
