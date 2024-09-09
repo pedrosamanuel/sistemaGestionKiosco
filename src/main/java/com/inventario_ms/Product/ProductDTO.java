@@ -1,14 +1,13 @@
 package com.inventario_ms.Product;
 
 import com.inventario_ms.Generic.BaseDTO;
-import com.inventario_ms.PriceList.PriceListProduct;
 import com.inventario_ms.Supplier.Supplier;
-import com.inventario_ms.Supplier.SupplierProduct;
-import jakarta.persistence.OneToMany;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.ArrayList;
 import java.util.List;
+@EqualsAndHashCode(callSuper = true)
 @Data
 public class ProductDTO extends BaseDTO<Long> {
     private String marca;

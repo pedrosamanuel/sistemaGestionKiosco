@@ -1,5 +1,10 @@
 package com.inventario_ms.Generic;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Setter
+@Getter
 public class BaseDTO<T> {
 
     private T id;
@@ -11,11 +16,4 @@ public class BaseDTO<T> {
         this.id = id;
     }
 
-    public T getId() {
-        return id;
-    }
-
-    public void setId(T id) {
-        this.id = id;
-    }
 }

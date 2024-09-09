@@ -1,9 +1,7 @@
 package com.inventario_ms.Util;
 
 import com.inventario_ms.Product.Product;
-import com.inventario_ms.Product.ProductRepository;
 import com.inventario_ms.Product.ProductService;
-import com.inventario_ms.Supplier.Supplier;
 import com.inventario_ms.Supplier.SupplierService;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
