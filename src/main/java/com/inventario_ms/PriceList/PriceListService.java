@@ -66,7 +66,12 @@ public class PriceListService extends GenericService<PriceList,PriceListDTO,Long
 
                 priceListProduct.setPrecio(row.getCell(3).getNumericCellValue());
                 priceListProduct.setCantidad((int) row.getCell(4).getNumericCellValue());
-                priceListProduct.setPromocion(row.getCell(5).getBooleanCellValue());
+                String promotion= row.getCell(5).getStringCellValue();
+                if(promotion.equals("Si")) priceListProduct.setPromocion(true);
+                else if (promotion.equals("No")) {
+                    priceListProduct.setPromocion(false);
+                }
+
                 priceListProduct.setPriceList(priceList);
                 priceListProducts.add(priceListProduct);
             }

@@ -16,6 +16,7 @@ public class ProductService extends GenericService<Product,ProductDTO,Long> {
         super(repository);
     }
 
+
     @Override
     protected Product updateEntity(Product entity, Product updatedEntity) {
         entity.setDescripcion(updatedEntity.getDescripcion());
@@ -37,10 +38,11 @@ public class ProductService extends GenericService<Product,ProductDTO,Long> {
         dto.setPrecio(entity.getPrecio());
         List<SupplierProduct> supplierProducts = entity.getSupplierProducts();
         List<Supplier> suppliers = new ArrayList<>();
-        for (SupplierProduct s : supplierProducts){
+        for (SupplierProduct s : supplierProducts) {
             suppliers.add(s.getSupplier());
         }
         dto.setSuppliers(suppliers);
         return dto;
     }
+
 }
