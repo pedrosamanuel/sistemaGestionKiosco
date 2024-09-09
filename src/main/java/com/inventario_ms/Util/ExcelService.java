@@ -2,7 +2,11 @@ package com.inventario_ms.Util;
 
 import com.inventario_ms.Product.Product;
 import com.inventario_ms.Product.ProductRepository;
+import com.inventario_ms.Product.ProductService;
+import com.inventario_ms.Supplier.Supplier;
+import com.inventario_ms.Supplier.SupplierService;
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellRangeAddressList;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -14,17 +18,16 @@ import java.util.List;
 
 @Service
 public class ExcelService {
-    private final ProductRepository productRepository;
+    private final ProductService productService;
+    private final SupplierService supplierService;
 
-    public ExcelService(ProductRepository productRepository) {
-        this.productRepository = productRepository;
+    public ExcelService(ProductService productService, SupplierService supplierService) {
+        this.productService = productService;
+        this.supplierService = supplierService;
     }
-
 
     public byte[] generateExcel(Long supplierId) throws IOException {
         XSSFWorkbook workbook = new XSSFWorkbook();
-
-        createValidity(workbook);
 
         createProduct(workbook, supplierId);
 
@@ -35,51 +38,61 @@ public class ExcelService {
         return baos.toByteArray();
     }
 
-    private void createValidity(XSSFWorkbook workbook) {
-        XSSFSheet sheet = workbook.createSheet("Vigencia");
-        Row headerRow = sheet.createRow(0);
-
-        Row row = sheet.createRow(1);
-        Cell cell10 = row.createCell(0);
-        Cell cell11 = row.createCell(1);
-
-        CreationHelper createHelper = workbook.getCreationHelper();
-
-        CellStyle bottomLeftCellStyle = workbook.createCellStyle();
-        bottomLeftCellStyle.setDataFormat(createHelper.createDataFormat().getFormat("yyyy-MM-dd"));
-
-        CellStyle bottomRightCellStyle = workbook.createCellStyle();
-        bottomRightCellStyle.setDataFormat(createHelper.createDataFormat().getFormat("yyyy-MM-dd"));
-
-        cell10.setCellStyle(bottomLeftCellStyle);
-        cell11.setCellStyle(bottomRightCellStyle);
-
-        String[] columnas = {"Fecha inicio vigencia", "Fecha fin Vigencia"};
-        createHeader(columnas, headerRow);
-
-        for (int i = 0; i < columnas.length; i++) {
-            sheet.autoSizeColumn(i);
-        }
-    }
-
     private void createProduct(XSSFWorkbook workbook, Long supplierId) {
         XSSFSheet sheet = workbook.createSheet("Articulos");
-        Row headerRow = sheet.createRow(0);
 
-        String[] columnas = {"idArticulo", "marca", "descripcion", "precio","cantidad", "promocion"};
-        createHeader(columnas, headerRow);
+        // Crear fila combinada y centrada "Lista de precio"
+        Row titleRow = sheet.createRow(0);
+        Cell titleCell = titleRow.createCell(0);
+        titleCell.setCellValue("Lista de precio");
 
-        for (int i = 0; i < columnas.length; i++) {
+        // Combinar las primeras 6 columnas para la fila del título
+        sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 5));
+
+        // Aplicar estilo centrado
+        CellStyle titleStyle = workbook.createCellStyle();
+        titleStyle.setAlignment(HorizontalAlignment.CENTER);
+        Font titleFont = workbook.createFont();
+        titleFont.setBold(true);
+        titleStyle.setFont(titleFont);
+        titleCell.setCellStyle(titleStyle);
+
+        // Crear fila "Proveedor:"
+        Row supplierRow = sheet.createRow(1);
+        Cell supplierCell = supplierRow.createCell(0);
+        supplierCell.setCellValue("Proveedor:");
+
+        Cell supplierNameCell = supplierRow.createCell(1);
+        supplierNameCell.setCellValue(supplierService.findById(supplierId).orElseThrow().getNombre());
+
+
+        // Crear fila "Vigencia hasta:"
+        Row vigenciaRow = sheet.createRow(2);
+        Cell vigenciaCell = vigenciaRow.createCell(0);
+        vigenciaCell.setCellValue("Vigencia hasta:");
+
+        CreationHelper createHelper = workbook.getCreationHelper();
+        CellStyle vigenciaDateCellStyle = workbook.createCellStyle();
+        vigenciaDateCellStyle.setDataFormat(createHelper.createDataFormat().getFormat("yyyy-MM-dd"));
+
+        Cell vigenciaDateCell = vigenciaRow.createCell(1);
+        vigenciaDateCell.setCellStyle(vigenciaDateCellStyle);
+
+        Row headerRow = sheet.createRow(4);
+
+        String[] column = {"idArticulo", "marca", "descripcion", "precio","cantidad", "promocion"};
+        createHeader(column, headerRow);
+
+        for (int i = 0; i < column.length; i++) {
             sheet.autoSizeColumn(i);
         }
-        List<Product> products = productRepository.findBySupplierId(supplierId);
+        List<Product> products = productService.findBySupplierId(supplierId);
 
 
-        int rowNum = 1;
+        int rowNum = 5;
         for (Product product : products) {
             Row row = sheet.createRow(rowNum++);
 
-            // Rellenar las celdas de la fila con los valores del producto
             row.createCell(0).setCellValue(product.getId());
             row.createCell(1).setCellValue(product.getMarca());
             row.createCell(2).setCellValue(product.getDescripcion());
@@ -89,10 +102,10 @@ public class ExcelService {
         addValidation(sheet, rowNum);
     }
 
-    private void createHeader(String[] columnas, Row headerRow) {
-        for (int i = 0; i < columnas.length; i++) {
+    private void createHeader(String[] column, Row headerRow) {
+        for (int i = 0; i < column.length; i++) {
             Cell cell = headerRow.createCell(i);
-            cell.setCellValue(columnas[i]);
+            cell.setCellValue(column[i]);
 
             CellStyle headerStyle = headerRow.getSheet().getWorkbook().createCellStyle();
             Font font = headerRow.getSheet().getWorkbook().createFont();

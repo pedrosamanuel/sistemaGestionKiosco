@@ -24,10 +24,14 @@ public abstract class GenericService<T,DTO, ID> {
         return repository.findAll(pageable);
     }
 
-    public Optional<DTO> findById(ID id) {
+    public Optional<DTO> findByIdDTO(ID id) {
         Optional<T> entity = repository.findById(id);
         return entity.map(this::convertToDTO);
     }
+    public Optional<T> findById(ID id) {
+        return repository.findById(id);
+    }
+
 
     public void save(T entity) {
         repository.save(entity);

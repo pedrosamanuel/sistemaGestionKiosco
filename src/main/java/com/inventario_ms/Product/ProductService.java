@@ -12,10 +12,15 @@ import java.util.List;
 
 @Service
 public class ProductService extends GenericService<Product,ProductDTO,Long> {
-    public ProductService(GenericRepository<Product, Long> repository) {
+    private final ProductRepository productRepository;
+    public ProductService(GenericRepository<Product, Long> repository, ProductRepository productRepository) {
         super(repository);
+        this.productRepository = productRepository;
     }
 
+    public List<Product> findBySupplierId(Long supplierId) {
+        return productRepository.findBySupplierId(supplierId);
+    }
 
     @Override
     protected Product updateEntity(Product entity, Product updatedEntity) {
@@ -44,5 +49,6 @@ public class ProductService extends GenericService<Product,ProductDTO,Long> {
         dto.setSuppliers(suppliers);
         return dto;
     }
+
 
 }

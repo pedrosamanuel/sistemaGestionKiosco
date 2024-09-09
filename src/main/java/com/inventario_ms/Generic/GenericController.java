@@ -20,7 +20,7 @@ public abstract class GenericController<T,DTO, ID> {
 
     @GetMapping("/{id}")
     public ResponseEntity<DTO> getById(@PathVariable ID id) {
-        Optional<DTO> entity = service.findById(id);
+        Optional<DTO> entity = service.findByIdDTO(id);
         return entity.map(ResponseEntity::ok).orElseGet(()
                 -> ResponseEntity.notFound().build());
     }
