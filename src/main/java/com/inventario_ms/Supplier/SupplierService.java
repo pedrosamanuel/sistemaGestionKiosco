@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
-public class SupplierService extends GenericService<Supplier,SupplierDTO,Long> {
+public class SupplierService extends GenericService<Supplier, SupplierDTO, Long> {
     private final SupplierRepository supplierRepository;
     private final ProductService productService;
     private final SupplierProductRepository supplierProductRepository;
@@ -24,29 +24,30 @@ public class SupplierService extends GenericService<Supplier,SupplierDTO,Long> {
         this.supplierProductRepository = supplierProductRepository;
     }
 
-    public Boolean addProduct(Long supplierId, Long productId){
+    public Boolean addProduct(Long supplierId, Long productId) {
         Supplier supplier = supplierRepository.findById(supplierId).orElseThrow();
         Product product = productService.findById(productId).orElseThrow();
 
-       boolean isAdded = supplierProductRepository.existsActiveSupplierProduct(supplierId,productId);
-       if (isAdded){
-           return false;
-       }
-       SupplierProduct supplierProduct =
-               new SupplierProduct(
-                       LocalDateTime.now(),
-                       null,
-                       supplier,
-                       product);
-       supplierProductRepository.save(supplierProduct);
-       return true;
+        boolean isAdded = supplierProductRepository.existsActiveSupplierProduct(supplierId, productId);
+        if (isAdded) {
+            return false;
+        }
+        SupplierProduct supplierProduct =
+                new SupplierProduct(
+                        LocalDateTime.now(),
+                        null,
+                        supplier,
+                        product);
+        supplierProductRepository.save(supplierProduct);
+        return true;
     }
-    public Boolean deleteProduct(Long supplierId, Long productId){
-        boolean isAdded = supplierProductRepository.existsActiveSupplierProduct(supplierId,productId);
-        if (isAdded){
+
+    public Boolean deleteProduct(Long supplierId, Long productId) {
+        boolean isAdded = supplierProductRepository.existsActiveSupplierProduct(supplierId, productId);
+        if (isAdded) {
             Optional<SupplierProduct> optional =
-                    supplierProductRepository.findBySupplierIdAndProductId(supplierId,productId);
-            if(optional.isPresent()){
+                    supplierProductRepository.findBySupplierIdAndProductId(supplierId, productId);
+            if (optional.isPresent()) {
                 SupplierProduct supplierProduct = optional.get();
                 supplierProduct.setFechaDesasignacion(LocalDateTime.now());
                 supplierProductRepository.save(supplierProduct);
