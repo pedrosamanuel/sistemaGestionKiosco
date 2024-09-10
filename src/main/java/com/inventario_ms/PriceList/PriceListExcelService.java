@@ -1,8 +1,9 @@
-package com.inventario_ms.Util;
+package com.inventario_ms.PriceList;
 
 import com.inventario_ms.Product.Product;
 import com.inventario_ms.Product.ProductService;
 import com.inventario_ms.Supplier.SupplierService;
+import com.inventario_ms.Util.ExcelHelper;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellRangeAddressList;
@@ -15,11 +16,11 @@ import java.io.IOException;
 import java.util.List;
 
 @Service
-public class ExcelService {
+public class PriceListExcelService {
     private final ProductService productService;
     private final SupplierService supplierService;
 
-    public ExcelService(ProductService productService, SupplierService supplierService) {
+    public PriceListExcelService(ProductService productService, SupplierService supplierService) {
         this.productService = productService;
         this.supplierService = supplierService;
     }
@@ -37,7 +38,7 @@ public class ExcelService {
     }
 
     private void createProduct(XSSFWorkbook workbook, Long supplierId) {
-        XSSFSheet sheet = workbook.createSheet("Articulos");
+        XSSFSheet sheet = workbook.createSheet("Productos");
 
         // Crear fila combinada y centrada "Lista de precio"
         Row titleRow = sheet.createRow(0);
@@ -48,12 +49,7 @@ public class ExcelService {
         sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 5));
 
         // Aplicar estilo centrado
-        CellStyle titleStyle = workbook.createCellStyle();
-        titleStyle.setAlignment(HorizontalAlignment.CENTER);
-        Font titleFont = workbook.createFont();
-        titleFont.setBold(true);
-        titleStyle.setFont(titleFont);
-        titleCell.setCellStyle(titleStyle);
+        titleCell.setCellStyle(ExcelHelper.createHeaderStyle(workbook));
 
         // Crear fila "Proveedor:"
         Row supplierRow = sheet.createRow(1);
@@ -78,12 +74,10 @@ public class ExcelService {
 
         Row headerRow = sheet.createRow(4);
 
-        String[] column = {"idArticulo", "marca", "descripcion", "precio","cantidad", "promocion"};
-        createHeader(column, headerRow);
+        String[] column = {"idProducto", "marca", "descripcion", "precio","cantidad", "promocion"};
+        ExcelHelper.createHeader(column, headerRow);
 
-        for (int i = 0; i < column.length; i++) {
-            sheet.autoSizeColumn(i);
-        }
+        ExcelHelper.autoSizeColumns(sheet,column.length);
         List<Product> products = productService.findBySupplierId(supplierId);
 
 
@@ -100,27 +94,14 @@ public class ExcelService {
         addValidation(sheet, rowNum);
     }
 
-    private void createHeader(String[] column, Row headerRow) {
-        for (int i = 0; i < column.length; i++) {
-            Cell cell = headerRow.createCell(i);
-            cell.setCellValue(column[i]);
 
-            CellStyle headerStyle = headerRow.getSheet().getWorkbook().createCellStyle();
-            Font font = headerRow.getSheet().getWorkbook().createFont();
-            font.setBold(true);
-            headerStyle.setFont(font);
-            cell.setCellStyle(headerStyle);
-        }
-    }
     private void addValidation(XSSFSheet sheet, int rowCount) {
 
         CellRangeAddressList addressList = new CellRangeAddressList(1, rowCount, 5, 5);
 
-
         DataValidationHelper validationHelper = sheet.getDataValidationHelper();
         DataValidationConstraint constraint = validationHelper.createExplicitListConstraint(new String[] {"Si", "No"});
         DataValidation dataValidation = validationHelper.createValidation(constraint, addressList);
-
 
         dataValidation.setShowErrorBox(true);
         sheet.addValidationData(dataValidation);

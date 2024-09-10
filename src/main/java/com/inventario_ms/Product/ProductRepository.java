@@ -12,6 +12,13 @@ public interface ProductRepository extends GenericRepository<Product,Long> {
 
     @Query("SELECT p" +" FROM Product p " +
             "JOIN SupplierProduct sp ON p.id=sp.product.id " +
-            "WHERE sp.supplier.id = :supplierId" )
+            "WHERE sp.supplier.id = :supplierId")
     List<Product> findBySupplierId(@Param("supplierId") Long supplierId);
+
+    @Query("SELECT p" +" FROM Product p " +
+            "JOIN SupplierProduct sp ON p.id=sp.product.id " +
+            "WHERE sp.supplier.id = :supplierId " +
+            "AND p.stockActual < p.stockMinimo")
+    List<Product> findBySupplierIdAndStock(@Param("supplierId") Long supplierId);
+
 }

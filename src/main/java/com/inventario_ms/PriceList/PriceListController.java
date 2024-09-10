@@ -1,7 +1,6 @@
 package com.inventario_ms.PriceList;
 
 import com.inventario_ms.Generic.GenericController;
-import com.inventario_ms.Util.ExcelService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -15,11 +14,11 @@ import java.io.IOException;
 @RequestMapping("api/priceList")
 public class PriceListController extends GenericController<PriceList, PriceListDTO, Long> {
     private final PriceListService priceListService;
-    private final ExcelService excelService;
-    public PriceListController (PriceListService priceListService, ExcelService excelService){
+    private final PriceListExcelService priceListExcelService;
+    public PriceListController (PriceListService priceListService, PriceListExcelService priceListExcelService){
         super(priceListService);
         this.priceListService = priceListService;
-        this.excelService = excelService;
+        this.priceListExcelService = priceListExcelService;
     }
 
     @PostMapping("/{supplierId}/upload")
@@ -35,7 +34,7 @@ public class PriceListController extends GenericController<PriceList, PriceListD
     @GetMapping("/{supplierId}/download")
     public ResponseEntity<byte[]> downloadSupplierTemplate(@PathVariable Long supplierId) {
         try {
-            byte[] excelContent = excelService.generateExcel(supplierId);
+            byte[] excelContent = priceListExcelService.generateExcel(supplierId);
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);

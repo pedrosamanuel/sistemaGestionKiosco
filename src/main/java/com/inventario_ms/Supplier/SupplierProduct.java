@@ -3,6 +3,7 @@ package com.inventario_ms.Supplier;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.inventario_ms.Generic.BaseEntity;
 import com.inventario_ms.Product.Product;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;

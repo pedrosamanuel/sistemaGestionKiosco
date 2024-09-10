@@ -22,6 +22,7 @@ public class ProductService extends GenericService<Product,ProductDTO,Long> {
         return productRepository.findBySupplierId(supplierId);
     }
 
+
     @Override
     protected Product updateEntity(Product entity, Product updatedEntity) {
         entity.setDescripcion(updatedEntity.getDescripcion());
@@ -48,6 +49,11 @@ public class ProductService extends GenericService<Product,ProductDTO,Long> {
         }
         dto.setSuppliers(suppliers);
         return dto;
+    }
+
+
+    public List<Product> findBySupplierIdAndStock(Long supplierId) {
+        return productRepository.findBySupplierIdAndStock(supplierId);
     }
 
 

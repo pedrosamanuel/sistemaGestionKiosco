@@ -15,7 +15,7 @@ import java.util.List;
 @Data
 public class PriceList extends BaseEntity<Long> {
     private LocalDate fechaInicioVigencia;
-    private LocalDate fechaFinvigencia;
+    private LocalDate fechaFinVigencia;
     @OneToMany(mappedBy = "priceList", cascade = CascadeType.ALL)
     private List<PriceListProduct> priceListProducts = new ArrayList<>();
     @ManyToOne

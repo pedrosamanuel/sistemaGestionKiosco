@@ -9,7 +9,7 @@ import java.util.List;
 @Data
 public class PriceListDTO  {
     private LocalDate fechaInicioVigencia;
-    private LocalDate fechaFinvigencia;
+    private LocalDate fechaFinVigencia;
     private List<PriceListProduct> priceListProducts = new ArrayList<>();
     private Supplier supplier;
 }

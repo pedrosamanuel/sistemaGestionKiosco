@@ -12,6 +12,5 @@ public interface SupplierProductRepository extends GenericRepository<SupplierPro
     @Query(value = "SELECT count(sp) > 0 FROM supplier_product sp " +
             "WHERE sp.supplier_id = :supplierId and sp.product_id = :productId and sp.fecha_desasignacion IS NULL", nativeQuery = true )
     boolean existsActiveSupplierProduct(@Param("supplierId")Long supplierId,@Param("productId")Long productId);
-
     Optional<SupplierProduct> findBySupplierIdAndProductId(Long supplierId, Long productId);
 }

@@ -42,7 +42,7 @@ public class PriceListService extends GenericService<PriceList,PriceListDTO,Long
     @Override
     protected PriceListDTO convertToDTO(PriceList entity) {
         PriceListDTO dto = new PriceListDTO();
-        dto.setFechaFinvigencia(entity.getFechaFinvigencia());
+        dto.setFechaFinVigencia(entity.getFechaFinVigencia());
         dto.setFechaInicioVigencia(entity.getFechaInicioVigencia());
         dto.setSupplier(entity.getSupplier());
         dto.setPriceListProducts(entity.getPriceListProducts());
@@ -59,7 +59,7 @@ public class PriceListService extends GenericService<PriceList,PriceListDTO,Long
             Row r = sheet.getRow(2);
             if (r != null) {
                 priceList.setFechaInicioVigencia(LocalDate.now());
-                priceList.setFechaFinvigencia(r.getCell(1).getLocalDateTimeCellValue().toLocalDate());
+                priceList.setFechaFinVigencia(r.getCell(1).getLocalDateTimeCellValue().toLocalDate());
             }
 
             for(Row row: sheet){
@@ -95,5 +95,9 @@ public class PriceListService extends GenericService<PriceList,PriceListDTO,Long
             throw new RuntimeException(e);
         }
 
+    }
+
+    public PriceList findBySupplierAndDate(Long supplierId) {
+        return priceListRepository.findBySupplierAndDate(supplierId);
     }
 }
