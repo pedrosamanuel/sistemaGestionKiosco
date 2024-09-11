@@ -50,11 +50,4 @@ public class ProductService extends GenericService<Product,ProductDTO,Long> {
         dto.setSuppliers(suppliers);
         return dto;
     }
-
-
-    public List<Product> findBySupplierIdAndStock(Long supplierId) {
-        return productRepository.findBySupplierIdAndStock(supplierId);
-    }
-
-
 }

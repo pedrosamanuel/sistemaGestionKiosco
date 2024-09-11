@@ -23,12 +23,10 @@ import java.util.Set;
 @Service
 public class OrderExcelService {
     private final SupplierService supplierService;
-    private final ProductService productService;
     private final PriceListService priceListService;
 
     public OrderExcelService(SupplierService supplierService, ProductService productService, PriceListService priceListService) {
         this.supplierService = supplierService;
-        this.productService = productService;
         this.priceListService = priceListService;
     }
 
@@ -45,14 +43,16 @@ public class OrderExcelService {
         ExcelHelper.autoSizeColumns(sheet, column.length);
 
         Set<Long> addedIds = new HashSet<>();
+        int rowNum = 4;
+
         if (orderRequest.isAllProducts()) {
-            addAllProducts(sheet, supplierId);
+            rowNum = addAllProducts(sheet, supplierId, rowNum, addedIds);
         }
         if(orderRequest.isBelowMinStock()){
-            addBellowMinStock(sheet,supplierId,addedIds);
+            rowNum = addBellowMinStock(sheet,supplierId, rowNum, addedIds);
         }
         if (orderRequest.isDiscountProducts()){
-            addDiscountProduct(sheet,supplierId,addedIds);
+           addDiscountProduct(sheet,supplierId, rowNum, addedIds);
         }
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -61,9 +61,7 @@ public class OrderExcelService {
 
         return baos.toByteArray();
     }
-
-    public void createHeader(XSSFWorkbook workbook, XSSFSheet sheet, Long supplierId) {
-
+    private void createHeader(XSSFWorkbook workbook, XSSFSheet sheet, Long supplierId) {
         // Crear fila combinada y centrada "Orden de Compra"
         Row titleRow = sheet.createRow(0);
         Cell titleCell = titleRow.createCell(0);
@@ -84,84 +82,56 @@ public class OrderExcelService {
         supplierNameCell.setCellValue(supplierService.findById(supplierId).orElseThrow().getNombre());
     }
 
-    public void addAllProducts(XSSFSheet sheet, Long supplierId) {
-        List<Product> products = productService.findBySupplierId(supplierId);
+    private int addAllProducts(XSSFSheet sheet, Long supplierId, int rowNum, Set<Long> addedIds) {
         PriceList priceList = priceListService.findBySupplierAndDate(supplierId);
         List<PriceListProduct> priceListProducts = priceList.getPriceListProducts();
-        int rowNum = 4;
-        for (Product product : products) {
-            Row row = sheet.createRow(rowNum++);
-
-            row.createCell(0).setCellValue(product.getId());
-            row.createCell(1).setCellValue(product.getMarca());
-            row.createCell(2).setCellValue(product.getDescripcion());
-            row.createCell(3).setCellValue(product.getStockActual());
-            row.createCell(4).setCellValue(product.getStockMinimo());
-            Cell cell5 = row.createCell(5);
-            cell5.setCellFormula("IF(D" + rowNum + " > C" + rowNum + ", D" + rowNum + " - C" + rowNum + ", 0)");
-            for (PriceListProduct priceListProduct : priceListProducts){
-                if(priceListProduct.getProduct().equals(product)){
-                    row.createCell(6).setCellValue(priceListProduct.getPrecio());
-                    row.createCell(7).setCellValue(priceListProduct.getCantidad());
-                    row.createCell(8).setCellValue(priceListProduct.isPromocion() ? "Si" : "No");
-                }
-            }
-            Cell cell10 = row.createCell(10);
-            cell10.setCellFormula("E" + rowNum + " * F" + rowNum);
-
-        }
-    }
-    public void addBellowMinStock(XSSFSheet sheet, Long supplierId, Set<Long> addedIds) {
-        List<Product> products = productService.findBySupplierIdAndStock(supplierId);
-        PriceList priceList = priceListService.findBySupplierAndDate(supplierId);
-        List<PriceListProduct> priceListProducts = priceList.getPriceListProducts();
-        int rowNum = 4;
-        for (Product product : products) {
-            Row row = sheet.createRow(rowNum++);
-            boolean isAdded = addedIds.add(product.getId());
-            if (!isAdded) continue;
-
-            row.createCell(0).setCellValue(product.getId());
-            row.createCell(1).setCellValue(product.getMarca());
-            row.createCell(2).setCellValue(product.getDescripcion());
-            row.createCell(3).setCellValue(product.getStockActual());
-            row.createCell(4).setCellValue(product.getStockMinimo());
-            Cell cell5 = row.createCell(5);
-            cell5.setCellFormula("IF(D" + rowNum + " > C" + rowNum + ", D" + rowNum + " - C" + rowNum + ", 0)");
-            for (PriceListProduct priceListProduct : priceListProducts){
-                if(priceListProduct.getProduct().equals(product)){
-                    row.createCell(6).setCellValue(priceListProduct.getPrecio());
-                    row.createCell(7).setCellValue(priceListProduct.getCantidad());
-                    row.createCell(8).setCellValue(priceListProduct.isPromocion() ? "Si" : "No");
-                }
-            }
-            Cell cell10 = row.createCell(10);
-            cell10.setCellFormula("G" + rowNum + " * J" + rowNum);
-
-        }
-    }
-    private void addDiscountProduct(XSSFSheet sheet, Long supplierId, Set<Long> addedIds) {
-        PriceList priceList = priceListService.findBySupplierAndDate(supplierId);
-        List<PriceListProduct> priceListProducts = priceList.getPriceListProducts();
-        int rowNum = 4;
         for (PriceListProduct priceListProduct : priceListProducts){
-                Product product = priceListProduct.getProduct();
-                boolean isAdded = addedIds.add(product.getId());
-                if (!isAdded) continue;
-                Row row = sheet.createRow(rowNum++);
-                row.createCell(0).setCellValue(product.getId());
-                row.createCell(1).setCellValue(product.getMarca());
-                row.createCell(2).setCellValue(product.getDescripcion());
-                row.createCell(3).setCellValue(product.getStockActual());
-                row.createCell(4).setCellValue(product.getStockMinimo());
-                Cell cell5 = row.createCell(5);
-                cell5.setCellFormula("IF(D" + rowNum + " > C" + rowNum + ", D" + rowNum + " - C" + rowNum + ", 0)");
-                row.createCell(6).setCellValue(priceListProduct.getPrecio());
-                row.createCell(7).setCellValue(priceListProduct.getCantidad());
-                row.createCell(8).setCellValue(priceListProduct.isPromocion() ? "Si" : "No");
-            Cell cell10 = row.createCell(10);
-            cell10.setCellFormula("E" + rowNum + " * F" + rowNum);
+            rowNum = addProductToSheet(priceListProduct, sheet, rowNum);
+        }
+        return rowNum;
+    }
+    private int addBellowMinStock(XSSFSheet sheet, Long supplierId, int rowNum, Set<Long> addedIds) {
+        PriceList priceList = priceListService.findBySupplierAndDate(supplierId);
+        List<PriceListProduct> priceListProducts = priceList.getPriceListProducts();
+
+        for (PriceListProduct priceListProduct : priceListProducts){
+            if(priceListProduct.getProduct().getStockMinimo() <
+                    priceListProduct.getProduct().getStockActual()) continue; //si el stockActual esta encima del minimo pasa al siguiente
+            boolean isAdded = addedIds.add(priceListProduct.getId());
+            if(!isAdded) continue; //si no esta añadido pasa al siguiente
+            rowNum = addProductToSheet(priceListProduct, sheet, rowNum);
+        }
+        return rowNum;
+    }
+    private void addDiscountProduct(XSSFSheet sheet, Long supplierId, int rowNum, Set<Long> addedIds) {
+        PriceList priceList = priceListService.findBySupplierAndDate(supplierId);
+        List<PriceListProduct> priceListProducts = priceList.getPriceListProducts();
+
+        for (PriceListProduct priceListProduct : priceListProducts){
+            if(!priceListProduct.isPromocion()) continue; // si no esta en promocion pasa al siguiente
+            boolean isAdded = addedIds.add(priceListProduct.getId());
+            if(!isAdded) continue;  //si ya esta añadido pasa al siguiente
+            rowNum = addProductToSheet(priceListProduct, sheet, rowNum);
         }
     }
+    private int addProductToSheet(PriceListProduct priceListProduct, XSSFSheet sheet, int rowNum){
+        Product product = priceListProduct.getProduct();
+        Row row = sheet.createRow(rowNum++);
+        row.createCell(0).setCellValue(product.getId());
+        row.createCell(1).setCellValue(product.getMarca());
+        row.createCell(2).setCellValue(product.getDescripcion());
+        row.createCell(3).setCellValue(product.getStockActual());
+        row.createCell(4).setCellValue(product.getStockMinimo());
 
+        Cell cell5 = row.createCell(5);
+        cell5.setCellFormula("IF(E" + rowNum + " > D" + rowNum + ", E" + rowNum + " - D" + rowNum + ", 0)");
+
+        row.createCell(6).setCellValue(priceListProduct.getPrecio());
+        row.createCell(7).setCellValue(priceListProduct.getCantidad());
+        row.createCell(8).setCellValue(priceListProduct.isPromocion() ? "Si" : "No");
+
+        Cell cell10 = row.createCell(10);
+        cell10.setCellFormula("G" + rowNum + " * J" + rowNum);
+        return rowNum;
+    }
 }
