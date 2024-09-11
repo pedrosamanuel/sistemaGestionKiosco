@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,7 +15,7 @@ import java.util.List;
 @Entity
 @Data
 public class PriceList extends BaseEntity<Long> {
-    private LocalDate fechaInicioVigencia;
+    private LocalDateTime fechaInicioVigencia;
     private LocalDate fechaFinVigencia;
     @OneToMany(mappedBy = "priceList", cascade = CascadeType.ALL)
     private List<PriceListProduct> priceListProducts = new ArrayList<>();

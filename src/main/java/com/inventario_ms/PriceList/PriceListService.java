@@ -14,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -58,7 +59,7 @@ public class PriceListService extends GenericService<PriceList,PriceListDTO,Long
 
             Row r = sheet.getRow(2);
             if (r != null) {
-                priceList.setFechaInicioVigencia(LocalDate.now());
+                priceList.setFechaInicioVigencia(LocalDateTime.now());
                 priceList.setFechaFinVigencia(r.getCell(1).getLocalDateTimeCellValue().toLocalDate());
             }
 
@@ -98,6 +99,6 @@ public class PriceListService extends GenericService<PriceList,PriceListDTO,Long
     }
 
     public PriceList findBySupplierAndDate(Long supplierId) {
-        return priceListRepository.findBySupplierAndDate(supplierId);
+        return priceListRepository.findBySupplierAndDate(supplierId).get(0);
     }
 }

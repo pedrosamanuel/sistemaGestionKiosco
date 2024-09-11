@@ -5,6 +5,7 @@ import com.inventario_ms.Product.Product;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.aspectj.weaver.ast.Or;
@@ -12,6 +13,7 @@ import org.aspectj.weaver.ast.Or;
 @EqualsAndHashCode(callSuper = true)
 @Entity
 @Data
+@Builder
 public class OrderProduct extends BaseEntity<Long> {
     private int cantidad;
     private double precioUnitario;

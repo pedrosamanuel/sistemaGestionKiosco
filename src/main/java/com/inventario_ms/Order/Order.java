@@ -3,16 +3,19 @@ package com.inventario_ms.Order;
 import com.inventario_ms.Generic.BaseEntity;
 import com.inventario_ms.Supplier.Supplier;
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
 @Entity
 @Data
+@Builder
 @Table(name = "purchase_order")
 public class Order extends BaseEntity<Long> {
     private LocalDateTime fechaOrdenDeCompra;
@@ -20,5 +23,6 @@ public class Order extends BaseEntity<Long> {
     @JoinColumn(name = "supplier_id")
     private Supplier supplier;
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
-    private List<OrderProduct> products;
+    @Builder.Default
+    private List<OrderProduct> products = new ArrayList<>();
 }
