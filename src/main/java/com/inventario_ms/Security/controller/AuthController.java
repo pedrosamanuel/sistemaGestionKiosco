@@ -64,10 +64,10 @@ public class AuthController {
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = jwtUtils.generateJwtToken(authentication);
         Cookie cookie = new Cookie("jwtToken", jwt);
-        cookie.setHttpOnly(true);  // Hace que la cookie no sea accesible desde JavaScript
-        cookie.setSecure(true);    // Solo se enviará la cookie por HTTPS
-        cookie.setPath("/");       // Hacer que la cookie esté disponible en todo el dominio
-        cookie.setMaxAge(24 * 60 * 60);  // Configurar la expiración (ej. 24 horas)
+        cookie.setHttpOnly(true);
+        cookie.setSecure(false);
+        cookie.setPath("/");
+        cookie.setMaxAge(24 * 60 * 60);
 
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
         List<String> roles = userDetails.getAuthorities().stream().map(item -> item.getAuthority())
@@ -128,22 +128,24 @@ public class AuthController {
 
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
+
     @PostMapping("/logout")
     public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response) {
 
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie cookie : cookies) {
-                if ("token".equals(cookie.getName())) {
-                    cookie.setValue(null);
-                    cookie.setMaxAge(0);
-                    cookie.setPath("/");
-                    cookie.setHttpOnly(true);
-                    response.addCookie(cookie);
+                if ("jwtToken".equals(cookie.getName()) || "marketId".equals(cookie.getName())) {
+                    Cookie deleteCookie = new Cookie(cookie.getName(), null);
+                    deleteCookie.setPath("/");
+                    deleteCookie.setHttpOnly(true);
+                    deleteCookie.setSecure(false);
+                    deleteCookie.setMaxAge(0);
+                    response.addCookie(deleteCookie);
                 }
             }
         }
 
-        return ResponseEntity.ok("Logout exitoso. Cookie JWT eliminada.");
+        return ResponseEntity.ok("Logout exitoso. Cookies eliminadas.");
     }
 }

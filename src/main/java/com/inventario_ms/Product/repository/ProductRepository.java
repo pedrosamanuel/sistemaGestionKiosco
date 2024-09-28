@@ -8,14 +8,14 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface ProductRepository extends NonDependentGenericRepository<Product,Long> {
 
-    @Query("SELECT p" +" FROM Product p " +
-            "JOIN SupplierProduct sp ON p.id=sp.product.id " +
-            "WHERE sp.supplier.id = :supplierId")
-    List<Product> findBySupplierId(@Param("supplierId") Long supplierId);
+    Optional<Product> findByCodigo(String codigo);
 
-
+    @Query("SELECT DISTINCT p.codigo FROM Product p")
+    Set<String> findAllCodigos();
 }

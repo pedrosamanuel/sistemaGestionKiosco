@@ -3,6 +3,7 @@ package com.inventario_ms.Generic.MarketDependent;
 
 import com.inventario_ms.Market.domain.Market;
 import com.inventario_ms.Market.service.MarketService;
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -28,7 +29,7 @@ public abstract class MarketDependentGenericService<T,DTO, R extends MarketDepen
     }
 
     public Optional<DTO> findByIdDTO(Long marketId , ID id) {
-        Optional<T> entity = repository.findByIdAndMarketId(marketId, id);
+        Optional<T> entity = repository.findByIdAndMarketId(id, marketId);
         return entity.map(this::convertToDTO);
     }
     public Optional<T> findById(ID id) {
@@ -39,18 +40,18 @@ public abstract class MarketDependentGenericService<T,DTO, R extends MarketDepen
     public void save(Long marketId, T entity) {
         repository.save(setMarket(entity, marketId));
     }
-
+    @Transactional
     public Boolean deleteById(Long marketId, ID id) {
-        Optional<T> existingEntity = repository.findByIdAndMarketId(marketId, id);
+        Optional<T> existingEntity = repository.findByIdAndMarketId(id, marketId);
         if (existingEntity.isPresent()) {
-            repository.deleteByIdAndMarketId(marketId, id);
+            repository.deleteByIdAndMarketId(id, marketId);
             return true;
         }
         return false;
     }
 
     public Boolean update(Long marketId, ID id, T updatedEntity) {
-        Optional<T> existingEntity = repository.findByIdAndMarketId(marketId, id);
+        Optional<T> existingEntity = repository.findByIdAndMarketId(id, marketId);
         if (existingEntity.isPresent()) {
             T entity = existingEntity.get();
             T updated = updateEntity(entity, updatedEntity);

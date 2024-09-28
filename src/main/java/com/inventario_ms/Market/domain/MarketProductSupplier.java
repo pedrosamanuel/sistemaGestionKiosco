@@ -1,8 +1,9 @@
-package com.inventario_ms.Supplier.domain;
+package com.inventario_ms.Market.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.inventario_ms.Generic.BaseDTO;
 import com.inventario_ms.Generic.BaseEntity;
-import com.inventario_ms.Product.domain.Product;
+import com.inventario_ms.Supplier.domain.Supplier;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -18,14 +19,14 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class SupplierProduct extends BaseEntity<Long> {
+public class MarketProductSupplier extends BaseEntity<Long> {
     private LocalDateTime fechaAsignacion;
     private LocalDateTime fechaDesasignacion;
     @JoinColumn(name = "supplier_id")
     @ManyToOne
     private Supplier supplier;
     @JsonIgnore
-    @JoinColumn(name = "product_id")
+    @JoinColumn(name = "market_product_id")
     @ManyToOne
-    private Product product;
+    private MarketProduct marketProduct;
 }

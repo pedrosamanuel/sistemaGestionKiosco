@@ -62,7 +62,7 @@ public class OrderService  {
 
     private OrderProduct extractOrderProductFromRow(Row row) {
         return OrderProduct.builder()
-                .product(productService.findById((long) row.getCell(0).getNumericCellValue()).orElseThrow())
+                .product(productService.findByCodigo(row.getCell(0).getStringCellValue()).orElseThrow())
                 .precioUnitario(row.getCell(6).getNumericCellValue())
                 .cantidad((int) row.getCell(9).getNumericCellValue())
                 .build();
@@ -81,7 +81,7 @@ public class OrderService  {
             }
         }
 
-        String[] columns = {"Marca", "Descripción", "Precio Unitario", "Cantidad", "Subtotal"};
+        String[] columns = {"Descripción", "Precio Unitario", "Cantidad", "Subtotal"};
         Row headerRow = sheet.createRow(3);
         for (int i = 0; i < columns.length; i++) {
             Cell cell = headerRow.createCell(i);
@@ -94,21 +94,20 @@ public class OrderService  {
         for (OrderProduct orderProduct : products) {
             Row row = sheet.createRow(rowNum++);
 
-            row.createCell(0).setCellValue(orderProduct.getProduct().getMarca()); // Marca
-            row.createCell(1).setCellValue(orderProduct.getProduct().getDescripcion()); // Descripción
-            row.createCell(2).setCellValue(orderProduct.getPrecioUnitario()); // Precio Unitario
-            row.createCell(3).setCellValue(orderProduct.getCantidad()); // Cantidad
+            row.createCell(0).setCellValue(orderProduct.getProduct().getDescripcion()); // Descripción
+            row.createCell(1).setCellValue(orderProduct.getPrecioUnitario()); // Precio Unitario
+            row.createCell(2).setCellValue(orderProduct.getCantidad()); // Cantidad
 
             double subtotal = orderProduct.getPrecioUnitario() * orderProduct.getCantidad();
-            row.createCell(4).setCellValue(subtotal);
+            row.createCell(3).setCellValue(subtotal);
 
             total += subtotal;
 
         }
 
         Row totalRow = sheet.createRow(rowNum);
-        totalRow.createCell(3).setCellValue("Total:");
-        totalRow.createCell(4).setCellValue(total);
+        totalRow.createCell(2).setCellValue("Total:");
+        totalRow.createCell(3).setCellValue(total);
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         workbook.write(baos);

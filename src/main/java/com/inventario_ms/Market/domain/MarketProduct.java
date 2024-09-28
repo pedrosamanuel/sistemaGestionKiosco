@@ -7,14 +7,18 @@ import com.inventario_ms.Product.domain.Product;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import jakarta.persistence.OneToMany;
+import lombok.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
 @Entity
 @Builder
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class MarketProduct extends BaseEntity<Long> {
     private double precio;
     private int stockActual;
@@ -26,6 +30,9 @@ public class MarketProduct extends BaseEntity<Long> {
     @JoinColumn(name = "market_id")
     @JsonIgnore
     private Market market;
+    @OneToMany(mappedBy = "marketProduct")
+    @Builder.Default
+    private List<MarketProductSupplier> suppliers = new ArrayList<>();
     @ManyToOne
     @JoinColumn(name = "category_id")
     private Category category;

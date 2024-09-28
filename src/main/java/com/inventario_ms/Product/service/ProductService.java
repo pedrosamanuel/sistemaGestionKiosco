@@ -1,18 +1,18 @@
 package com.inventario_ms.Product.service;
 
-import com.inventario_ms.Generic.MarketDependent.MarketDependentGenericRepository;
-import com.inventario_ms.Generic.MarketDependent.MarketDependentGenericService;
-import com.inventario_ms.Generic.NonDependent.NonDependentGenericRepository;
 import com.inventario_ms.Generic.NonDependent.NonDependentGenericService;
 import com.inventario_ms.Product.domain.Product;
 import com.inventario_ms.Product.dto.ProductDTO;
 import com.inventario_ms.Product.repository.ProductRepository;
-import com.inventario_ms.Supplier.domain.Supplier;
-import com.inventario_ms.Supplier.domain.SupplierProduct;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 
 @Service
@@ -24,16 +24,10 @@ public class ProductService extends NonDependentGenericService<Product, ProductD
         this.productRepository = productRepository;
     }
 
-
-    public List<Product> findBySupplierId(Long supplierId) {
-        return productRepository.findBySupplierId(supplierId);
-    }
-
-
     @Override
     protected Product updateEntity(Product entity, Product updatedEntity) {
         entity.setDescripcion(updatedEntity.getDescripcion());
-        entity.setMarca(updatedEntity.getMarca());
+        entity.setCodigo(updatedEntity.getCodigo());
         return entity;
     }
 
@@ -41,14 +35,40 @@ public class ProductService extends NonDependentGenericService<Product, ProductD
     protected ProductDTO convertToDTO(Product entity) {
         ProductDTO dto = new ProductDTO();
         dto.setId(entity.getId());
-        dto.setMarca(entity.getMarca());
+        dto.setCodigo(entity.getCodigo());
         dto.setDescripcion(entity.getDescripcion());
-        List<SupplierProduct> supplierProducts = entity.getSupplierProducts();
-        List<Supplier> suppliers = new ArrayList<>();
-        for (SupplierProduct s : supplierProducts) {
-            suppliers.add(s.getSupplier());
-        }
-        dto.setSuppliers(suppliers);
         return dto;
     }
+
+    public Optional<Product> findByCodigo(String codigo) {
+        return productRepository.findByCodigo(codigo);
+    }
+
+    public boolean uploadProducts(MultipartFile file) {
+        Set<String> existingCodes = productRepository.findAllCodigos();
+
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
+            String line;
+
+            while ((line = br.readLine()) != null) {
+                if (line.trim().isEmpty() || line.startsWith("id") || line.startsWith("Ultima")
+                        || ((line.split("\\|").length) < 2)) {
+                    continue;
+                }
+
+                String[] lineProductArray = line.split("\\|");
+
+                if (lineProductArray[4].equals("1") && !existingCodes.contains(lineProductArray[3])) {
+                    Product product = new Product();
+                    product.setCodigo(lineProductArray[3]);
+                    product.setDescripcion(lineProductArray[5]);
+                    productRepository.save(product);
+                    existingCodes.add(lineProductArray[3]);
+                }
+            }
+            return true;
+        } catch (IOException e) {
+            throw new RuntimeException("Error al procesar el archivo CSV", e);
+        }
+}
 }

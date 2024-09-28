@@ -2,14 +2,16 @@ package com.inventario_ms.Market.controller;
 
 
 import com.inventario_ms.Generic.NonDependent.NonDependentGenericController;
+import com.inventario_ms.Market.domain.Market;
 import com.inventario_ms.Market.domain.MarketProduct;
 import com.inventario_ms.Market.dto.MarketDTO;
-import com.inventario_ms.Market.domain.Market;
 import com.inventario_ms.Market.repository.MarketRepository;
 import com.inventario_ms.Market.request.MarketProductRequest;
 import com.inventario_ms.Market.service.MarketService;
-import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.data.domain.Page;
+import org.springframework.data.web.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -36,44 +38,23 @@ public class MarketController extends NonDependentGenericController<Market, Mark
     public ResponseEntity<String> selectMarket(
             @RequestParam Long marketId,
             @PathVariable Long userId,
-            HttpSession session) {
+            HttpServletResponse response) {
+
 
         if (!marketService.marketBelongsToUser(marketId, userId)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No autorizado");
         }
-        session.setAttribute("selectedMarketId", marketId);
+
+        Cookie marketCookie = new Cookie("marketId", marketId.toString());
+        marketCookie.setHttpOnly(true);
+        marketCookie.setSecure(false);
+        marketCookie.setPath("/");
+        marketCookie.setMaxAge(24 * 60 * 60);
+
+        response.addCookie(marketCookie);
+
         return ResponseEntity.ok("Market seleccionado correctamente");
     }
-    @GetMapping("/{marketId}/getProduct")
-    public Page<MarketProduct> getPaginatedProducts(
-            @PathVariable Long marketId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        return marketService.getPaginatedProducts(marketId, page, size);
-    }
 
-    @PostMapping("/addProduct")
-    public ResponseEntity<String> addProduct(
-            @RequestBody MarketProductRequest marketProductRequest,
-            HttpSession session){
-        Long marketId = (Long) session.getAttribute("selectedMarketId");
 
-        Boolean isAdded = marketService.addProduct(marketId , marketProductRequest);
-        if(isAdded) {
-            return ResponseEntity.ok("Producto añadido correctamente");
-        }
-        return ResponseEntity.ok("Producto no añadido correctamente");
-    }
-    @PostMapping("/deleteProduct")
-    public ResponseEntity<String> deleteProduct(
-            @RequestParam Long productId,
-            HttpSession session){
-        Long marketId = (Long) session.getAttribute("selectedMarket");
-        Boolean isDeleted = marketService.deleteProduct(marketId,productId);
-        if (isDeleted) {
-            return ResponseEntity.ok("Producto eliminado correctamente");
-        }
-        return ResponseEntity.ok("Producto no eliminado correctamente");
-
-    }
 }

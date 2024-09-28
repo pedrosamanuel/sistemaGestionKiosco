@@ -1,6 +1,8 @@
 package com.inventario_ms.Category.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.inventario_ms.Generic.BaseEntity;
 import com.inventario_ms.Market.domain.Market;
 import com.inventario_ms.Market.domain.MarketProduct;

@@ -1,6 +1,7 @@
 package com.inventario_ms.Order.service;
 
 import com.inventario_ms.Market.domain.MarketProduct;
+import com.inventario_ms.Market.service.MarketProductService;
 import com.inventario_ms.Market.service.MarketService;
 import com.inventario_ms.Order.dto.OrderRequest;
 import com.inventario_ms.PriceList.domain.PriceList;
@@ -27,12 +28,13 @@ import java.util.Set;
 public class OrderExcelService {
     private final SupplierService supplierService;
     private final PriceListService priceListService;
-    private final MarketService marketService;
+    private final MarketProductService marketProductService;
 
-    public OrderExcelService(SupplierService supplierService, ProductService productService, PriceListService priceListService, MarketService marketService) {
+    public OrderExcelService(SupplierService supplierService, PriceListService priceListService,
+                             MarketProductService marketProductService) {
         this.supplierService = supplierService;
         this.priceListService = priceListService;
-        this.marketService = marketService;
+        this.marketProductService = marketProductService;
     }
 
     public byte[] generateExcel(Long supplierId, Long marketId,  OrderRequest orderRequest) throws IOException {
@@ -41,7 +43,7 @@ public class OrderExcelService {
 
         createHeader(workbook, sheet, supplierId);
 
-        String[] column = {"idProducto", "marcaProducto", "descripcionProducto","stockActual", "stockMinimo","faltante", "precioUnit", "cantidad p/precioUnit",
+        String[] column = {"codProducto", "descripcionProducto","stockActual", "stockMinimo","faltante", "precioUnit", "cantidad p/precioUnit",
                 "esPromocion","cantidadComprada", "total"};
         Row headerRow = sheet.createRow(3);
         ExcelHelper.createHeader(column, headerRow);
@@ -102,7 +104,7 @@ public class OrderExcelService {
 
         for (PriceListProduct priceListProduct : priceListProducts){
             MarketProduct marketProduct =
-                    marketService.findByMarketIdAndProductId(marketId,priceListProduct.getProduct().getId());
+                    marketProductService.findByMarketIdAndProductId(marketId,priceListProduct.getProduct().getId());
             if(marketProduct.getStockMinimo() <
                   marketProduct.getStockActual()) continue; //si el stockActual esta encima del minimo pasa al siguiente
             boolean isAdded = addedIds.add(priceListProduct.getId());
@@ -125,23 +127,22 @@ public class OrderExcelService {
     private int addProductToSheet(PriceListProduct priceListProduct, Long marketId, XSSFSheet sheet, int rowNum){
         Product product = priceListProduct.getProduct();
         MarketProduct marketProduct =
-                marketService.findByMarketIdAndProductId(marketId,priceListProduct.getProduct().getId());
+                marketProductService.findByMarketIdAndProductId(marketId,priceListProduct.getProduct().getId());
         Row row = sheet.createRow(rowNum++);
-        row.createCell(0).setCellValue(product.getId());
-        row.createCell(1).setCellValue(product.getMarca());
-        row.createCell(2).setCellValue(product.getDescripcion());
-        row.createCell(3).setCellValue(marketProduct.getStockActual());
-        row.createCell(4).setCellValue(marketProduct.getStockMinimo());
+        row.createCell(0).setCellValue(product.getCodigo());
+        row.createCell(1).setCellValue(product.getDescripcion());
+        row.createCell(2).setCellValue(marketProduct.getStockActual());
+        row.createCell(3).setCellValue(marketProduct.getStockMinimo());
 
-        Cell cell5 = row.createCell(5);
-        cell5.setCellFormula("IF(E" + rowNum + " > D" + rowNum + ", E" + rowNum + " - D" + rowNum + ", 0)");
+        Cell cell5 = row.createCell(4);
+        cell5.setCellFormula("IF(D" + rowNum + " > C" + rowNum + ", D" + rowNum + " - C" + rowNum + ", 0)");
 
-        row.createCell(6).setCellValue(priceListProduct.getPrecio());
-        row.createCell(7).setCellValue(priceListProduct.getCantidad());
-        row.createCell(8).setCellValue(priceListProduct.isPromocion() ? "Si" : "No");
+        row.createCell(5).setCellValue(priceListProduct.getPrecio());
+        row.createCell(6).setCellValue(priceListProduct.getCantidad());
+        row.createCell(7).setCellValue(priceListProduct.isPromocion() ? "Si" : "No");
 
-        Cell cell10 = row.createCell(10);
-        cell10.setCellFormula("G" + rowNum + " * J" + rowNum);
+        Cell cell10 = row.createCell(9);
+        cell10.setCellFormula("F" + rowNum + " * I" + rowNum);
         return rowNum;
     }
 }

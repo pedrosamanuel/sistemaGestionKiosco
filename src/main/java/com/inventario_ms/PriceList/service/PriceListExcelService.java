@@ -1,5 +1,8 @@
 package com.inventario_ms.PriceList.service;
 
+import com.inventario_ms.Market.domain.MarketProduct;
+import com.inventario_ms.Market.domain.MarketProductSupplier;
+import com.inventario_ms.Market.service.MarketProductService;
 import com.inventario_ms.Product.domain.Product;
 import com.inventario_ms.Product.service.ProductService;
 import com.inventario_ms.Supplier.service.SupplierService;
@@ -17,11 +20,11 @@ import java.util.List;
 
 @Service
 public class PriceListExcelService {
-    private final ProductService productService;
+    private final MarketProductService marketProductService;
     private final SupplierService supplierService;
 
-    public PriceListExcelService(ProductService productService, SupplierService supplierService) {
-        this.productService = productService;
+    public PriceListExcelService(MarketProductService marketProductService, SupplierService supplierService) {
+        this.marketProductService = marketProductService;
         this.supplierService = supplierService;
     }
 
@@ -74,21 +77,21 @@ public class PriceListExcelService {
 
         Row headerRow = sheet.createRow(4);
 
-        String[] column = {"idProducto", "marca", "descripcion", "precio","cantidad", "promocion"};
+        String[] column = {"codProducto", "descripcion", "precio","cantidad", "promocion"};
         ExcelHelper.createHeader(column, headerRow);
 
         ExcelHelper.autoSizeColumns(sheet,column.length);
-        List<Product> products = productService.findBySupplierId(supplierId);
+        List<MarketProduct> marketProducts = marketProductService.findBySupplierId(supplierId);
 
 
         int rowNum = 5;
-        for (Product product : products) {
+        for (MarketProduct marketProduct : marketProducts) {
             Row row = sheet.createRow(rowNum++);
+            Product product = marketProduct.getProduct();
 
-            row.createCell(0).setCellValue(product.getId());
-            row.createCell(1).setCellValue(product.getMarca());
-            row.createCell(2).setCellValue(product.getDescripcion());
-            row.createCell(5).setCellValue("No");
+            row.createCell(0).setCellValue(product.getCodigo());
+            row.createCell(1).setCellValue(product.getDescripcion());
+            row.createCell(4).setCellValue("No");
 
         }
         addValidation(sheet, rowNum);

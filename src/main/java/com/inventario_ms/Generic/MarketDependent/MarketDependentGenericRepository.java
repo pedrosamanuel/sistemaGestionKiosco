@@ -9,11 +9,11 @@ import java.util.Optional;
 
 @NoRepositoryBean
 public interface MarketDependentGenericRepository<T, ID> extends JpaRepository<T, ID> {
-    
 
-    <T> List<T> findAllByMarketId(Long marketId);
+    List<T> findAllByMarketId(Long marketId);
 
-    <T> Optional<T> findByIdAndMarketId(Long marketId, ID id);
+    Optional<T> findByIdAndMarketId(ID id, Long marketId);
 
-    void deleteByIdAndMarketId(Long marketId, ID id);
+    void deleteByIdAndMarketId(ID id, Long marketId);
+
 }

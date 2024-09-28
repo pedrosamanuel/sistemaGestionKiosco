@@ -13,5 +13,5 @@ import java.util.List;
 @Data
 public class CategoryDTO extends BaseDTO<Long> {
     private String nombre;
-    private List<MarketProduct> products = new ArrayList<>();
+    private double costoMultiplicador;
 }

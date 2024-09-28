@@ -5,7 +5,7 @@ import com.inventario_ms.Generic.BaseEntity;
 import com.inventario_ms.Market.domain.MarketProduct;
 import com.inventario_ms.Order.domain.OrderProduct;
 import com.inventario_ms.PriceList.domain.PriceListProduct;
-import com.inventario_ms.Supplier.domain.SupplierProduct;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
 import lombok.Data;
@@ -19,11 +19,9 @@ import java.util.List;
 @Entity
 @Data
 public class Product extends BaseEntity<Long> {
-    private String marca;
+    @Column(nullable = false, unique = true)
+    private String codigo;
     private String descripcion;
-    @JsonIgnore
-    @OneToMany(mappedBy = "product")
-    private List<SupplierProduct> supplierProducts = new ArrayList<>();
     @JsonIgnore
     @OneToMany(mappedBy = "product")
     private List<PriceListProduct> priceListProducts= new ArrayList<>();
