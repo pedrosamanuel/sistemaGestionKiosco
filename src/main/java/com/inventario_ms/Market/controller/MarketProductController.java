@@ -22,7 +22,7 @@ public class MarketProductController extends MarketDependentGenericController<Ma
     }
 
     @GetMapping("/pages")
-    public ResponseEntity<PagedModel<MarketProduct>> getPaginatedProducts(
+    public ResponseEntity<PagedModel<MarketProductDTO>> getPaginatedProducts(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @CookieValue(value = "marketId", defaultValue = "null") String cookie) {
@@ -32,9 +32,9 @@ public class MarketProductController extends MarketDependentGenericController<Ma
         }
 
         Long marketId = Long.parseLong(cookie);
-        Page<MarketProduct> marketProductPage = marketProductService.getPaginatedProducts(marketId, page, size);
+        Page<MarketProductDTO> marketProductPage = marketProductService.getPaginatedProducts(marketId, page, size);
 
-        PagedModel<MarketProduct> pagedModel = new PagedModel<>(marketProductPage);
+        PagedModel<MarketProductDTO> pagedModel = new PagedModel<>(marketProductPage);
         return ResponseEntity.ok(pagedModel);
     }
 }

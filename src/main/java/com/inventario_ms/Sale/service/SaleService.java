@@ -6,16 +6,27 @@ import com.inventario_ms.Generic.NonDependent.NonDependentGenericService;
 import com.inventario_ms.Market.service.MarketService;
 import com.inventario_ms.Sale.domain.Sale;
 import com.inventario_ms.Sale.dto.SaleDTO;
+import com.inventario_ms.Sale.event.SaleEvent;
 import com.inventario_ms.Sale.repository.SaleRepository;
+import org.springframework.context.ApplicationEvent;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 @Service
 public class SaleService extends MarketDependentGenericService<Sale, SaleDTO, SaleRepository, Long> {
-
+    private final SaleRepository saleRepository;
     private final MarketService marketService;
-    public SaleService(SaleRepository repository, MarketService marketService) {
-        super(repository);
+    private final ApplicationEventPublisher applicationEventPublisher;
+    public SaleService(SaleRepository saleRepository, MarketService marketService, ApplicationEventPublisher applicationEventPublisher) {
+        super(saleRepository);
+        this.saleRepository = saleRepository;
         this.marketService = marketService;
+        this.applicationEventPublisher = applicationEventPublisher;
+    }
+    @Override
+    public void save(Long marketId,  Sale sale) {
+        applicationEventPublisher.publishEvent(new SaleEvent(this, sale.getSaleMarketProducts()));
+        saleRepository.save(setMarket(sale, marketId));
     }
 
     @Override

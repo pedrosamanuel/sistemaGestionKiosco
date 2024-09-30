@@ -4,6 +4,7 @@ import com.inventario_ms.Generic.MarketDependent.MarketDependentGenericService;
 import com.inventario_ms.Order.domain.Order;
 import com.inventario_ms.Order.domain.OrderProduct;
 import com.inventario_ms.Order.dto.OrderDTO;
+import com.inventario_ms.Order.event.OrderEvent;
 import com.inventario_ms.Order.repository.OrderRepository;
 import com.inventario_ms.Product.service.ProductService;
 import com.inventario_ms.Supplier.service.SupplierService;
@@ -11,6 +12,7 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -22,11 +24,16 @@ import java.util.List;
 
 @Service
 public class OrderService  {
+    private final ApplicationEventPublisher applicationEventPublisher;
     private final OrderRepository orderRepository;
     private final SupplierService supplierService;
     private final ProductService productService;
 
-    public OrderService(OrderRepository orderRepository, SupplierService supplierService, ProductService productService) {
+    public OrderService(ApplicationEventPublisher applicationEventPublisher,
+                        OrderRepository orderRepository,
+                        SupplierService supplierService,
+                        ProductService productService) {
+        this.applicationEventPublisher = applicationEventPublisher;
         this.orderRepository = orderRepository;
         this.supplierService = supplierService;
         this.productService = productService;
@@ -36,7 +43,6 @@ public class OrderService  {
     public byte[] processAndGenerateExcel(Long supplierId, MultipartFile file) throws IOException {
         XSSFWorkbook workbook = new XSSFWorkbook(file.getInputStream());
         XSSFSheet sheet = workbook.getSheetAt(0);
-
         Order order = Order.builder()
                 .fechaOrdenDeCompra(LocalDateTime.now())
                 .supplier(supplierService.findById(supplierId).orElseThrow())
@@ -51,6 +57,8 @@ public class OrderService  {
         }
 
         order.setProducts(products);
+
+        applicationEventPublisher.publishEvent(new OrderEvent(this, order.getProducts(), order.getSupplier().getMarket().getId()));
 
         orderRepository.save(order);
 
