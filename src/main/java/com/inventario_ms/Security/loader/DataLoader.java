@@ -19,9 +19,9 @@ public class DataLoader implements CommandLineRunner {
     @Override
     @Transactional
     public void run(String... args) throws Exception {
-        createRoleIfNotFound(ERole.ROLE_USER);
         createRoleIfNotFound(ERole.ROLE_ADMIN);
-        createRoleIfNotFound(ERole.ROLE_MODERATOR);
+        createRoleIfNotFound(ERole.ROLE_SUPPLIER);
+        createRoleIfNotFound(ERole.ROLE_SELLER);
     }
 
     @Transactional

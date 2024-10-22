@@ -6,6 +6,7 @@ import com.inventario_ms.Market.domain.MarketProduct;
 import com.inventario_ms.Market.dto.MarketProductDTO;
 import com.inventario_ms.Market.repository.MarketProductRepository;
 import com.inventario_ms.Order.domain.OrderProduct;
+import com.inventario_ms.PriceList.domain.PriceListProduct;
 import com.inventario_ms.Sale.domain.SaleMarketProduct;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
@@ -32,14 +33,14 @@ public class MarketProductService extends MarketDependentGenericService<MarketPr
                 MarketProduct marketProduct = optionalMarketProduct.get();
                 marketProduct.setStockActual(marketProduct.getStockActual() -
                         smp.getCantidad());
-                marketProductRepository.save(marketProduct);
             }
         }
     }
     @Transactional
     public void increaseStock(List<OrderProduct> orderProducts, Long marketId){
         for (OrderProduct orderProduct : orderProducts){
-            Optional<MarketProduct> optionalMarketProduct = marketProductRepository.findByMarketIdAndProductId(marketId,orderProduct.getProduct().getId());
+            Optional<MarketProduct> optionalMarketProduct =
+                    marketProductRepository.findByMarketIdAndProductId(marketId,orderProduct.getProduct().getId());
             if (optionalMarketProduct.isPresent()){
                 MarketProduct marketProduct = optionalMarketProduct.get();
                 marketProduct.setStockActual(marketProduct.getStockActual() +
@@ -47,7 +48,28 @@ public class MarketProductService extends MarketDependentGenericService<MarketPr
             }
         }
     }
+    @Transactional
+    public void changePrice(List<PriceListProduct> priceListProducts, Long marketId) {
+        for (PriceListProduct plp : priceListProducts){
+            Optional<MarketProduct> optionalMarketProduct =
+                    marketProductRepository.findByMarketIdAndProductId(marketId, plp.getProduct().getId());
+            if(optionalMarketProduct.isPresent()){
+                MarketProduct marketProduct = optionalMarketProduct.get();
+                double multiplier = marketProduct.getCategory().getCostoMultiplicador();
+                marketProduct.setPrecio(priceRounder(multiplier, plp.getPrecio()));
+            }
+        }
+    }
+    public static double priceRounder(double multiplier, double cost){
+        double price = multiplier * cost;
 
+        if (price % 10 >= 5){
+            price = Math.ceil(price / 10) * 10;
+        }else {
+            price = Math.floor(price / 10) * 10;
+        }
+        return price;
+    }
 
     @Override
     protected MarketProduct setMarket(MarketProduct entity, Long marketId) {
@@ -89,4 +111,24 @@ public class MarketProductService extends MarketDependentGenericService<MarketPr
         return marketProductPage.map(this::convertToDTO);
     }
 
+    public MarketProductDTO findByMarketIdAndCodPro(Long marketId, String codProduct) {
+        Optional<MarketProduct> optionalMarketProduct =
+                marketProductRepository.findByMarketIdAndCodPro(marketId, codProduct);
+        if (optionalMarketProduct.isPresent()){
+            MarketProduct marketProduct = optionalMarketProduct.get();
+            return convertToDTO(marketProduct);
+        }
+        return null;
+    }
+
+    public MarketProduct addProduct(Long marketId, MarketProduct marketProduct) {
+        Optional<MarketProduct> optionalMarketProduct =
+                marketProductRepository.findByMarketIdAndProductId(marketId, marketProduct.getProduct().getId());
+        if (optionalMarketProduct.isEmpty()){
+            Optional<Market> optionalMarket = marketService.findById(marketId);
+            marketProduct.setMarket(optionalMarket.orElse(null));
+            return marketProductRepository.save(marketProduct);
+        }
+        return null;
+    }
 }

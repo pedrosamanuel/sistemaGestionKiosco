@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/marketProduct")
 public class MarketProductController extends MarketDependentGenericController<MarketProduct, MarketProductDTO,
         MarketProductService, MarketProductRepository, Long> {
+
     private final MarketProductService marketProductService;
     public MarketProductController(MarketProductService marketProductService) {
         super(marketProductService);
@@ -36,5 +37,33 @@ public class MarketProductController extends MarketDependentGenericController<Ma
 
         PagedModel<MarketProductDTO> pagedModel = new PagedModel<>(marketProductPage);
         return ResponseEntity.ok(pagedModel);
+    }
+    @GetMapping("/cod/{codProduct}")
+    public ResponseEntity<MarketProductDTO> getMarketProductByCodProduct(@PathVariable String codProduct, @CookieValue(value = "marketId", defaultValue = "null") String cookie) {
+        if (cookie.equals("null")) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+        Long marketId = Long.parseLong(cookie);
+        MarketProductDTO marketProductDTO
+                = marketProductService.findByMarketIdAndCodPro(marketId, codProduct);
+        if (marketProductDTO != null) {
+            return new ResponseEntity<>(marketProductDTO, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    @PostMapping("/id")
+    public ResponseEntity<MarketProduct> saveMarketProduct(@RequestBody MarketProduct marketProduct,
+                                                @CookieValue(value = "marketId",defaultValue = "null") String cookie) {
+        if (cookie.equals("null")) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+        Long marketId = Long.parseLong(cookie);
+        MarketProduct marketProductAdded =
+                marketProductService.addProduct(marketId, marketProduct);
+        if (marketProductAdded != null){
+            return ResponseEntity.ok(marketProductAdded);
+        }
+        return ResponseEntity.badRequest().build();
     }
 }

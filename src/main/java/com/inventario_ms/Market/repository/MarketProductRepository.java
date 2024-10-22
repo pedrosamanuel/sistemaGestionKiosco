@@ -24,4 +24,10 @@ public interface MarketProductRepository extends MarketDependentGenericRepositor
             "mps.marketProduct.id = mp.id WHERE mps.supplier.id = :supplierId " +
             "AND mps.fechaDesasignacion IS NULL")
     List<MarketProduct> findActiveBySupplier(@Param("supplierId") Long supplierId);
+    @Query("SELECT mp FROM MarketProduct mp WHERE " +
+            "mp.market.id = :marketId AND mp.product.codigo = :codProd")
+    Optional<MarketProduct> findByMarketIdAndCodPro(@Param("marketId") Long marketId, @Param("codProd") String codProduct);
+
+    Optional<MarketProduct> findByProductId(Long id);
+
 }

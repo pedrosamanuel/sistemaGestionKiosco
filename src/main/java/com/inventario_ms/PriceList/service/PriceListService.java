@@ -3,6 +3,7 @@ package com.inventario_ms.PriceList.service;
 import com.inventario_ms.PriceList.domain.PriceList;
 import com.inventario_ms.PriceList.domain.PriceListProduct;
 import com.inventario_ms.PriceList.dto.PriceListDTO;
+import com.inventario_ms.PriceList.event.PriceListEvent;
 import com.inventario_ms.PriceList.repository.PriceListRepository;
 import com.inventario_ms.Product.domain.Product;
 import com.inventario_ms.Product.service.ProductService;
@@ -11,6 +12,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -23,20 +25,23 @@ import java.util.Optional;
 
 @Service
 public class PriceListService{
+    private final ApplicationEventPublisher applicationEventPublisher;
     private final ProductService productService;
     private final PriceListRepository priceListRepository;
     private final SupplierService supplierService;
 
-    public PriceListService(PriceListRepository priceListRepository,
+    public PriceListService(ApplicationEventPublisher applicationEventPublisher,
+                            PriceListRepository priceListRepository,
                             ProductService productService,
                             SupplierService supplierService) {
+        this.applicationEventPublisher = applicationEventPublisher;
         this.productService = productService;
         this.priceListRepository = priceListRepository;
         this.supplierService = supplierService;
 
     }
 
-    public PriceListDTO uploadPriceList(Long supplierId, MultipartFile file) {
+    public PriceListDTO uploadPriceList(Long marketId ,Long supplierId, MultipartFile file) {
         PriceList priceList = new PriceList();
         List<PriceListProduct> priceListProducts = new ArrayList<>();
         try {
@@ -56,12 +61,12 @@ public class PriceListService{
                 }
                 PriceListProduct priceListProduct = new PriceListProduct();
 
-                Optional<Product> optional = productService.findById((long) row.getCell(0).getNumericCellValue());
+                Optional<Product> optional = productService.findByCodigo((row.getCell(0).getStringCellValue()));
                 priceListProduct.setProduct(optional.orElse(null));
 
-                priceListProduct.setPrecio(row.getCell(3).getNumericCellValue());
-                priceListProduct.setCantidad((int) row.getCell(4).getNumericCellValue());
-                String promotion= row.getCell(5).getStringCellValue();
+                priceListProduct.setPrecio(row.getCell(2).getNumericCellValue());
+                priceListProduct.setCantidad((int) row.getCell(3).getNumericCellValue());
+                String promotion= row.getCell(4).getStringCellValue();
                 if(promotion.equals("Si")) priceListProduct.setPromocion(true);
                 else if (promotion.equals("No")) {
                     priceListProduct.setPromocion(false);
@@ -76,6 +81,8 @@ public class PriceListService{
             priceList.setSupplier(supplierService.findById(supplierId).orElseThrow());
 
             PriceListDTO priceListDTO = convertToDTO(priceList);
+
+            applicationEventPublisher.publishEvent(new PriceListEvent(this, priceListProducts, marketId));
 
             priceListRepository.save(priceList);
             return priceListDTO;

@@ -6,13 +6,13 @@ import com.inventario_ms.Product.domain.Product;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.*;
 
 @EqualsAndHashCode(callSuper = true)
 @Entity
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 @Builder
 public class OrderProduct extends BaseEntity<Long> {
     private int cantidad;

@@ -47,7 +47,7 @@ public class OrderExcelService {
                 "esPromocion","cantidadComprada", "total"};
         Row headerRow = sheet.createRow(3);
         ExcelHelper.createHeader(column, headerRow);
-        ExcelHelper.autoSizeColumns(sheet, column.length);
+
 
         Set<Long> addedIds = new HashSet<>();
         int rowNum = 4;
@@ -61,6 +61,7 @@ public class OrderExcelService {
         if (orderRequest.isDiscountProducts()){
            addDiscountProduct(sheet,supplierId,marketId, rowNum, addedIds);
         }
+        ExcelHelper.autoSizeColumns(sheet, column.length);
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         workbook.write(baos);

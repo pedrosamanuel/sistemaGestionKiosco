@@ -5,12 +5,17 @@ import com.inventario_ms.Generic.MarketDependent.MarketDependentGenericService;
 import com.inventario_ms.Generic.NonDependent.NonDependentGenericService;
 import com.inventario_ms.Market.service.MarketService;
 import com.inventario_ms.Sale.domain.Sale;
+import com.inventario_ms.Sale.domain.SaleMarketProduct;
 import com.inventario_ms.Sale.dto.SaleDTO;
 import com.inventario_ms.Sale.event.SaleEvent;
 import com.inventario_ms.Sale.repository.SaleRepository;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class SaleService extends MarketDependentGenericService<Sale, SaleDTO, SaleRepository, Long> {
@@ -25,7 +30,11 @@ public class SaleService extends MarketDependentGenericService<Sale, SaleDTO, Sa
     }
     @Override
     public void save(Long marketId,  Sale sale) {
-        applicationEventPublisher.publishEvent(new SaleEvent(this, sale.getSaleMarketProducts()));
+        List<SaleMarketProduct> saleMarketProduct = sale.getSaleMarketProducts();
+        for (SaleMarketProduct smp : saleMarketProduct){
+            smp.setSale(sale);
+        }
+        applicationEventPublisher.publishEvent(new SaleEvent(this, saleMarketProduct));
         saleRepository.save(setMarket(sale, marketId));
     }
 
@@ -48,5 +57,10 @@ public class SaleService extends MarketDependentGenericService<Sale, SaleDTO, Sa
         dto.setSaleMarketProducts(entity.getSaleMarketProducts());
         dto.setTotalSale(entity.getTotalSale());
         return dto;
+    }
+
+    public List<Sale> findByDate(Long marketId) {
+        LocalDate localDate = LocalDate.now();
+        return saleRepository.findByDate(marketId, localDate);
     }
 }

@@ -4,6 +4,7 @@ import com.inventario_ms.Generic.NonDependent.NonDependentGenericService;
 import com.inventario_ms.Product.domain.Product;
 import com.inventario_ms.Product.dto.ProductDTO;
 import com.inventario_ms.Product.repository.ProductRepository;
+import org.apache.poi.sl.draw.geom.GuideIf;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -38,6 +39,14 @@ public class ProductService extends NonDependentGenericService<Product, ProductD
         dto.setCodigo(entity.getCodigo());
         dto.setDescripcion(entity.getDescripcion());
         return dto;
+    }
+    @Override
+    public void save(Product product){
+        Optional<Product> optionalProduct =
+                productRepository.findByCodigo(product.getCodigo());
+        if (optionalProduct.isEmpty()){
+            productRepository.save(product);
+        }
     }
 
     public Optional<Product> findByCodigo(String codigo) {

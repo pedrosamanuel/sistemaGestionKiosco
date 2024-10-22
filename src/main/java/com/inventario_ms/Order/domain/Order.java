@@ -3,9 +3,7 @@ package com.inventario_ms.Order.domain;
 import com.inventario_ms.Generic.BaseEntity;
 import com.inventario_ms.Supplier.domain.Supplier;
 import jakarta.persistence.*;
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -14,6 +12,8 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 @Entity
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 @Builder
 @Table(name = "purchase_order")
 public class Order extends BaseEntity<Long> {

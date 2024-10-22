@@ -1,5 +1,6 @@
 package com.inventario_ms.Order.service;
 
+import com.inventario_ms.Common.ExcelHelper;
 import com.inventario_ms.Generic.MarketDependent.MarketDependentGenericService;
 import com.inventario_ms.Order.domain.Order;
 import com.inventario_ms.Order.domain.OrderProduct;
@@ -117,6 +118,7 @@ public class OrderService  {
         totalRow.createCell(2).setCellValue("Total:");
         totalRow.createCell(3).setCellValue(total);
 
+        ExcelHelper.autoSizeColumns(sheet, columns.length);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         workbook.write(baos);
         workbook.close();

@@ -2,30 +2,46 @@ package com.inventario_ms.Market.service;
 
 import com.inventario_ms.Generic.NonDependent.NonDependentGenericService;
 import com.inventario_ms.Market.domain.Market;
-import com.inventario_ms.Market.domain.MarketProduct;
 import com.inventario_ms.Market.dto.MarketDTO;
-import com.inventario_ms.Market.repository.MarketProductRepository;
 import com.inventario_ms.Market.repository.MarketRepository;
-import com.inventario_ms.Market.request.MarketProductRequest;
-import com.inventario_ms.Product.domain.Product;
-import com.inventario_ms.Product.service.ProductService;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+import com.inventario_ms.Security.service.RoleService;
+import com.inventario_ms.Security.model.ERole;
+import com.inventario_ms.Security.model.Role;
+import com.inventario_ms.Security.model.User;
+import com.inventario_ms.Security.model.UserMarketRole;
+import com.inventario_ms.Security.repository.UserMarketRoleRepository;
+import com.inventario_ms.Security.service.UserDetailsServiceImpl;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 public class MarketService extends NonDependentGenericService<Market, MarketDTO, MarketRepository, Long> {
+
     private final MarketRepository marketRepository;
-    public MarketService(MarketRepository marketRepository, MarketProductRepository marketProductRepository) {
+    private final RoleService roleService;
+    private final UserDetailsServiceImpl userDetailsService;
+
+    private final UserMarketRoleRepository userMarketRoleRepository;
+    public MarketService(MarketRepository marketRepository, RoleService roleService, UserDetailsServiceImpl userDetailsService, UserMarketRoleRepository userMarketRoleRepository) {
         super(marketRepository);
         this.marketRepository = marketRepository;
+        this.roleService = roleService;
+        this.userDetailsService = userDetailsService;
+        this.userMarketRoleRepository = userMarketRoleRepository;
     }
 
+    @Transactional
+    public void save(Market market, Long userId){
+        Market marketSaved = marketRepository.save(market);
+        User user = userDetailsService.loadUserById(userId);
+        Role role = roleService.findByName(ERole.ROLE_ADMIN).orElse(null);
 
+        UserMarketRole userMarketRole = new UserMarketRole(user,marketSaved,role);
+        userMarketRoleRepository.save(userMarketRole);
+    }
     @Override
     protected Market updateEntity(Market entity, Market updatedEntity) {
         entity.setName(updatedEntity.getName());

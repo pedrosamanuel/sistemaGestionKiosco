@@ -27,13 +27,14 @@ public class OrderController  {
         this.orderExcelService = orderExcelService;
     }
 
-    @GetMapping("/{supplierId}/getOrderTemplate")
+    @PostMapping("/{supplierId}/getOrderTemplate")
     public ResponseEntity<byte[]> getOrderTemplate(@PathVariable Long supplierId,
-                                                   @RequestBody OrderRequest orderRequest, HttpSession session){
-        Long marketId = (Long) session.getAttribute("selectedMarketId");
-        if (marketId == null) {
+                                                   @RequestBody OrderRequest orderRequest,
+                                                   @CookieValue(value = "marketId",defaultValue = "null") String cookie) {
+        if (cookie.equals("null")) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
+        Long marketId = Long.parseLong(cookie);
         try {
             byte[] excelContent = orderExcelService.generateExcel(supplierId, marketId, orderRequest);
 

@@ -24,8 +24,13 @@ public class PriceListController {
 
     @PostMapping("/{supplierId}/upload")
     public ResponseEntity<PriceListDTO> uploadSupplierPrices(@PathVariable("supplierId") Long supplierId,
-                                               @RequestParam("file") MultipartFile file) {
-        PriceListDTO priceListDTO = priceListService.uploadPriceList(supplierId, file);
+                                                             @RequestParam("file") MultipartFile file,
+                                                             @CookieValue(value = "marketId",defaultValue = "null") String cookie) {
+        if (cookie.equals("null")) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+        Long marketId = Long.parseLong(cookie);
+        PriceListDTO priceListDTO = priceListService.uploadPriceList(marketId, supplierId, file);
         if (priceListDTO != null){
             return ResponseEntity.ok(priceListDTO);
         }

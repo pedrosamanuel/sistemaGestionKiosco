@@ -80,7 +80,7 @@ public class PriceListExcelService {
         String[] column = {"codProducto", "descripcion", "precio","cantidad", "promocion"};
         ExcelHelper.createHeader(column, headerRow);
 
-        ExcelHelper.autoSizeColumns(sheet,column.length);
+
         List<MarketProduct> marketProducts = marketProductService.findBySupplierId(supplierId);
 
 
@@ -95,12 +95,13 @@ public class PriceListExcelService {
 
         }
         addValidation(sheet, rowNum);
+        ExcelHelper.autoSizeColumns(sheet,column.length);
     }
 
 
     private void addValidation(XSSFSheet sheet, int rowCount) {
 
-        CellRangeAddressList addressList = new CellRangeAddressList(1, rowCount, 5, 5);
+        CellRangeAddressList addressList = new CellRangeAddressList(1, rowCount, 4, 4);
 
         DataValidationHelper validationHelper = sheet.getDataValidationHelper();
         DataValidationConstraint constraint = validationHelper.createExplicitListConstraint(new String[] {"Si", "No"});

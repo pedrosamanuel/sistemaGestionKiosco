@@ -10,6 +10,7 @@ import jakarta.validation.constraints.Size;
 
 import lombok.Builder;
 import lombok.Data;
+import org.apache.commons.lang3.builder.HashCodeExclude;
 
 @Entity
 @Data
@@ -36,16 +37,9 @@ public class User {
     @Size(max = 120)
     private String password;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "user_roles",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id"))
-    private Set<Role> roles = new HashSet<>();
-
-
     @OneToMany(mappedBy = "user")
     @JsonIgnore
-    private List<Market> markets = new ArrayList<>();
+    private Set<UserMarketRole> userMarketRoles = new HashSet<>();
 
     public User(){
     }
@@ -55,6 +49,21 @@ public class User {
         this.email = email;
         this.password = password;
     }
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, username, email);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return Objects.equals(id, user.id) &&
+                Objects.equals(username, user.username) &&
+                Objects.equals(email, user.email);
+    }
+
 
 
 }
